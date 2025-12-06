@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace projet.DTO
+namespace metiers.shared
 {
     public enum Role
     {
@@ -8,7 +8,7 @@ namespace projet.DTO
         Medecin = 1
     }
 
-    public class NewUserDTO
+    public class UserDTO
     {
         [Required]
         public string Nom { get; set; }
@@ -31,4 +31,3 @@ namespace projet.DTO
         public Role Role { get; set; }
     }
 }
-

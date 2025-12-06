@@ -18,7 +18,13 @@ builder.Services.AddEndpointsApiExplorer();
 //ajout
 var cnx = builder.Configuration.GetConnectionString("cnx");
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(cnx));
+
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();  ////
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMedicamentRepository, MedicamentRepository>();
+builder.Services.AddScoped<IligneMedRepository, ligneMedRepository>();
+builder.Services.AddScoped<IOrdonnanceRepository, OrdonnanceRepository>();
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -68,19 +74,26 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddSwaggerGen(c =>
+{
+    c.CustomSchemaIds(type => type.FullName);
+});
+
+
+//pour permette au front d'utilser les methodes
 builder.Services.AddCors(
     policy => policy.AddPolicy("AllowAll", options => options.AllowAnyOrigin()
     .AllowAnyMethod().AllowAnyHeader()));
 
-var app = builder.Build();
 
+var app = builder.Build();
+app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -89,3 +102,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+

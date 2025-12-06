@@ -1,0 +1,89 @@
+﻿@page "/"
+@inject userServices userServices
+@inject NavigationManager navigationManager
+
+<h3>inscription</h3>
+
+<EditForm Model="UserDTO" OnValidSubmit="Handlesubmit">
+
+    <div class="form-group">
+        <label>Nom</label>
+        <input class="form-control" @bind-value="UserDTO.Nom" />
+    </div>
+
+    <div class="form-group">
+        <label>Prénom</label>
+        <input class="form-control" @bind-value="UserDTO.Prenom" />
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" @bind-value="UserDTO.Email" />
+    </div>
+
+    <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" class="form-control" @bind-value="UserDTO.Password" />
+    </div>
+
+    <div class="form-group">
+        <label>Téléphone</label>
+        <input class="form-control" @bind-value="UserDTO.Tel" />
+    </div>
+
+    <div class="form-group">
+        <label>Adresse</label>
+        <input class="form-control" @bind-value="UserDTO.Adresse" />
+    </div>
+
+    <!-- Sélecteur du rôle -->
+    <div class="form-group">
+        <label>Rôle</label>
+
+        <select class="form-control" @bind="UserDTO.Role">
+            <option value="">-- Choisir un rôle --</option>
+            <option value="Medecin">Médecin</option>
+            <option value="Pharmacien">Pharmacien</option>
+        </select>
+    </div>
+
+    @if (afficherSpecialite)
+    {
+        <div class="form-group">
+            <label>Spécialité (Médecin)</label>
+            <input class="form-control" @bind-value="UserDTO.Specialite" />
+        </div>
+    }
+
+    @if (afficherPharmacie)
+    {
+        <div class="form-group">
+            <label>Nom Pharmacie (Pharmacien)</label>
+            <input class="form-control" @bind-value="UserDTO.NomPharmacie" />
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">S’inscrire</button>
+</EditForm>
+@code {
+    public UserDTO UserDTO { get; set; } = new UserDTO();
+
+    bool afficherSpecialite = false;
+    bool afficherPharmacie = false;
+
+    private void AfficherChamps(ChangeEventArgs e)
+    {
+        var role = e.Value?.ToString();
+
+        afficherSpecialite = (role == "Medecin");
+        afficherPharmacie = (role == "Pharmacien");
+    }
+
+    private async Task Handlesubmit()
+    {
+        var result = await userServices.Register(UserDTO);
+
+        if (result)
+            navigationManager.NavigateTo("/Authentification/Login");
+    }
+}

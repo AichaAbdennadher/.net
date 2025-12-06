@@ -33,18 +33,23 @@ namespace metiers
         public string Adresse { get; set; }
 
         // Champ spécifique au médecin
-        public string Specialite { get; set; }
+        public string? Specialite { get; set; }
 
         // Champ spécifique au pharmacien
-        public string NomPharmacie { get; set; }
+        public string? NomPharmacie { get; set; }
 
         [Required]
         public Role Role { get; set; } // Utilisation de l'enum Role
 
         public ICollection<Medicament> medicaments { get; set; }
 
-        // Relation 1-* avec Ordonnance
-        public virtual ICollection<Ordonnance> Ordonnances { get; set; } 
+        public virtual ICollection<Patient> patients { get; set; }
+
+         // Ordonnances créées par ce médecin
+    public virtual ICollection<Ordonnance> OrdonnancesCreees { get; set; }
+
+    // Ordonnances assignées à ce pharmacien
+    //public virtual ICollection<Ordonnance> OrdonnancesAssignées { get; set; }
 
     }
 }

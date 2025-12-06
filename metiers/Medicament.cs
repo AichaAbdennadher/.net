@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using metiers;
+﻿using metiers;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace metiers
 {
@@ -19,8 +20,12 @@ namespace metiers
         [Range(0, int.MaxValue, ErrorMessage = "Le stock ne peut pas être négatif.")]
         public int Stock { get; set; }
 
-        //relation * - *
-        public ICollection<User> users { get; set; }
+        // --- Relation 1-*
+        public int UserID { get; set; }
+        [ForeignKey("UserID")]
+        public virtual User User { get; set; }
+        public virtual ICollection<LigneMedicament> LignesMedicaments { get; set; }
+
 
     }
 }

@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace projet.Migrations
 {
+    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -28,6 +30,13 @@ namespace projet.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Nom = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Prenom = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Tel = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Adresse = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Specialite = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NomPharmacie = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserRole = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -49,22 +58,7 @@ namespace projet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Medicaments",
-                columns: table => new
-                {
-                    MedicamentID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Stock = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Medicaments", x => x.MedicamentID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "users",
+                name: "User",
                 columns: table => new
                 {
                     UserID = table.Column<int>(type: "int", nullable: false)
@@ -75,13 +69,13 @@ namespace projet.Migrations
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Tel = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Adresse = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Specialite = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NomPharmacie = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Specialite = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NomPharmacie = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Role = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_users", x => x.UserID);
+                    table.PrimaryKey("PK_User", x => x.UserID);
                 });
 
             migrationBuilder.CreateTable(
@@ -191,25 +185,23 @@ namespace projet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MedicamentUser",
+                name: "medicaments",
                 columns: table => new
                 {
-                    medicamentsMedicamentID = table.Column<int>(type: "int", nullable: false),
-                    usersUserID = table.Column<int>(type: "int", nullable: false)
+                    MedicamentID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Stock = table.Column<int>(type: "int", nullable: false),
+                    UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MedicamentUser", x => new { x.medicamentsMedicamentID, x.usersUserID });
+                    table.PrimaryKey("PK_medicaments", x => x.MedicamentID);
                     table.ForeignKey(
-                        name: "FK_MedicamentUser_Medicaments_medicamentsMedicamentID",
-                        column: x => x.medicamentsMedicamentID,
-                        principalTable: "Medicaments",
-                        principalColumn: "MedicamentID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MedicamentUser_users_usersUserID",
-                        column: x => x.usersUserID,
-                        principalTable: "users",
+                        name: "FK_medicaments_User_UserID",
+                        column: x => x.UserID,
+                        principalTable: "User",
                         principalColumn: "UserID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -226,56 +218,62 @@ namespace projet.Migrations
                     DateNaissance = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Tel = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Adresse = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    MedecinID = table.Column<int>(type: "int", nullable: false),
                     UserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_patients", x => x.PatientID);
                     table.ForeignKey(
-                        name: "FK_patients_users_UserID",
+                        name: "FK_patients_User_UserID",
                         column: x => x.UserID,
-                        principalTable: "users",
+                        principalTable: "User",
                         principalColumn: "UserID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ordonances",
+                name: "ordonnances",
                 columns: table => new
                 {
                     OrdID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DateCreation = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    envoyee = table.Column<bool>(type: "bit", nullable: false),
                     Statut = table.Column<int>(type: "int", nullable: false),
                     PatientID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: false)
+                    MedecinID = table.Column<int>(type: "int", nullable: false),
+                    PharmacienID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ordonances", x => x.OrdID);
+                    table.PrimaryKey("PK_ordonnances", x => x.OrdID);
                     table.ForeignKey(
-                        name: "FK_Ordonances_patients_PatientID",
+                        name: "FK_ordonnances_User_MedecinID",
+                        column: x => x.MedecinID,
+                        principalTable: "User",
+                        principalColumn: "UserID");
+                    table.ForeignKey(
+                        name: "FK_ordonnances_User_PharmacienID",
+                        column: x => x.PharmacienID,
+                        principalTable: "User",
+                        principalColumn: "UserID");
+                    table.ForeignKey(
+                        name: "FK_ordonnances_patients_PatientID",
                         column: x => x.PatientID,
                         principalTable: "patients",
-                        principalColumn: "PatientID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Ordonances_users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "users",
-                        principalColumn: "UserID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "PatientID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "lignesMedicament",
+                name: "lignesMedicaments",
                 columns: table => new
                 {
                     ligneID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     qtePrescrite = table.Column<int>(type: "int", nullable: false),
                     qteDelivre = table.Column<int>(type: "int", nullable: false),
-                    dateDelivre = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    dateDelivre = table.Column<DateTime>(type: "datetime2", nullable: true),
                     dose = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     statut = table.Column<int>(type: "int", nullable: false),
                     ordID = table.Column<int>(type: "int", nullable: false),
@@ -283,17 +281,16 @@ namespace projet.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_lignesMedicament", x => x.ligneID);
+                    table.PrimaryKey("PK_lignesMedicaments", x => x.ligneID);
                     table.ForeignKey(
-                        name: "FK_lignesMedicament_Medicaments_MedicamentID",
+                        name: "FK_lignesMedicaments_medicaments_MedicamentID",
                         column: x => x.MedicamentID,
-                        principalTable: "Medicaments",
-                        principalColumn: "MedicamentID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "medicaments",
+                        principalColumn: "MedicamentID");
                     table.ForeignKey(
-                        name: "FK_lignesMedicament_Ordonances_ordID",
+                        name: "FK_lignesMedicaments_ordonnances_ordID",
                         column: x => x.ordID,
-                        principalTable: "Ordonances",
+                        principalTable: "ordonnances",
                         principalColumn: "OrdID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -338,29 +335,34 @@ namespace projet.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_lignesMedicament_MedicamentID",
-                table: "lignesMedicament",
+                name: "IX_lignesMedicaments_MedicamentID",
+                table: "lignesMedicaments",
                 column: "MedicamentID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_lignesMedicament_ordID",
-                table: "lignesMedicament",
+                name: "IX_lignesMedicaments_ordID",
+                table: "lignesMedicaments",
                 column: "ordID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MedicamentUser_usersUserID",
-                table: "MedicamentUser",
-                column: "usersUserID");
+                name: "IX_medicaments_UserID",
+                table: "medicaments",
+                column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ordonances_PatientID",
-                table: "Ordonances",
+                name: "IX_ordonnances_MedecinID",
+                table: "ordonnances",
+                column: "MedecinID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ordonnances_PatientID",
+                table: "ordonnances",
                 column: "PatientID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ordonances_UserID",
-                table: "Ordonances",
-                column: "UserID");
+                name: "IX_ordonnances_PharmacienID",
+                table: "ordonnances",
+                column: "PharmacienID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_patients_UserID",
@@ -368,6 +370,7 @@ namespace projet.Migrations
                 column: "UserID");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
@@ -386,10 +389,7 @@ namespace projet.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "lignesMedicament");
-
-            migrationBuilder.DropTable(
-                name: "MedicamentUser");
+                name: "lignesMedicaments");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -398,16 +398,16 @@ namespace projet.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Ordonances");
+                name: "medicaments");
 
             migrationBuilder.DropTable(
-                name: "Medicaments");
+                name: "ordonnances");
 
             migrationBuilder.DropTable(
                 name: "patients");
 
             migrationBuilder.DropTable(
-                name: "users");
+                name: "User");
         }
     }
 }

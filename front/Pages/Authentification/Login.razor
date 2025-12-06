@@ -1,0 +1,53 @@
+﻿@page "/Authentification/Login"
+@inject userServices UserServices
+@inject NavigationManager navigationManager
+
+<h3>Connexion</h3>
+
+<div class="card p-4" style="max-width: 400px;">
+    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value="loginModel.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label>Mot de passe</label>
+            <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
+        </div>
+
+        <button class="btn btn-primary w-100">Se connecter</button>
+        <button class="btn btn-primary" @onclick="GoToHome">Retour à l'inscription</button>
+
+        @if (loginFailed)
+        {
+            <p class="text-danger mt-2">Email ou mot de passe incorrect.</p>
+        }
+    </EditForm>
+</div>
+
+@code {
+    private LoginDTO loginModel = new LoginDTO(); 
+    private bool loginFailed = false;
+    private void GoToHome()
+    {
+        navigationManager.NavigateTo("/");
+    }
+    private async Task HandleLogin()
+    {
+        loginFailed = false;
+
+        var success = await UserServices.Login(loginModel);
+
+        if (success)
+        {
+            navigationManager.NavigateTo("/");    // Redirection tableau de bord
+        }
+        else
+        {
+            loginFailed = true;
+        }
+    }
+}

@@ -23,5 +23,29 @@ namespace projet.Repositories
             await context.SaveChangesAsync();
             return patient;
         }
+        public async Task<List<Patient>> GetPatientsByMedecin(int medecinId)
+        {
+            return await context.patients
+                .Where(p => p.MedecinID == medecinId)
+                .ToListAsync();
+        }
+
+        public async Task<Patient> GetPatient(int id)
+        {
+            return await context.patients.FindAsync(id);
+        }
+
+        public async Task<bool> UpdatePatient(Patient Patient)
+        {
+            var dep = await context.patients.FindAsync(Patient.PatientID);
+            if (dep == null)
+                return false;
+            dep.Nom = Patient.Nom;
+            dep.Prenom = Patient.Prenom;
+            dep.Tel = Patient.Tel;
+            dep.Adresse = Patient.Adresse;
+            await context.SaveChangesAsync();
+            return true;
+        }
     }
 }

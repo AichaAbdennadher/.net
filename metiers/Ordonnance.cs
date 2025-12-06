@@ -12,6 +12,7 @@ namespace metiers
         [Required]
         public DateTime DateCreation { get; set; } = DateTime.Now;
 
+        public bool envoyee { get; set; } = false;
         [Required]
         public Statut Statut { get; set; } = Statut.EnAttente;
 
@@ -22,9 +23,23 @@ namespace metiers
         [ForeignKey("PatientID")]
         public virtual Patient Patient { get; set; } //ok
 
-        // --- Relation 1-*
-        [ForeignKey("UserID")]
-        public virtual User Medecin { get; set; }
+        // --- Médecin qui crée l'ordonnance ---
+        [Required]
+        public int MedecinID { get; set; }
+
+        [ForeignKey("MedecinID")]
+        public virtual User Medecin { get; set; }  // référence vers User où Role = Medecin
+
+        // --- Pharmacien choisi ---
+        [Required]
+        public int PharmacienID { get; set; }
+
+        [ForeignKey("PharmacienID")]
+        public virtual User Pharmacien { get; set; } // référence vers User où Role = Pharmacien
+
+        //Récupération des ordonnances :
+        //Pour accéder au médecin : ordonnance.Medecin.Nom
+        //Pour accéder au pharmacien : ordonnance.Pharmacien.Nom
 
         // --- Lignes de médicaments ---
         public ICollection<LigneMedicament> LigneMedicaments { get; set; }

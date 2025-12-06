@@ -1,4 +1,8 @@
-﻿namespace projet.DTO
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace metiers.shared
 {
     public class LoginDTO
     {
