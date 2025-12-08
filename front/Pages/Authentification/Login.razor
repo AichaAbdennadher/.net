@@ -1,40 +1,123 @@
 ﻿@page "/Authentification/Login"
 @inject userServices UserServices
 @inject NavigationManager navigationManager
+@inject IJSRuntime JS
 
-<h3>Connexion</h3>
+<section class="min-h-screen flex flex-col justify-center bg-gray-100 dark:bg-gray-900 px-4 py-8">
+    <div class="flex flex-col md:flex-row w-full max-w-5xl rounded-md shadow-2xl overflow-hidden bg-white dark:bg-gray-800 mx-auto">
 
-<div class="card p-4" style="max-width: 400px;">
-    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
-        <DataAnnotationsValidator />
+        <!-- Left: Slider -->
+        <div class="md:w-1/2 w-full text-white p-16 flex flex-col relative"
+             style="background: linear-gradient(to top right, #50bfa2,#95dbc8);">
 
-        <div class="mb-3">
-            <label>Email</label>
-            <InputText class="form-control" @bind-Value="loginModel.Email" />
+            <p class="text-3xl font-bold mb-4">
+                Medical Solution, your partner in health!
+            </p>
+            <p class="text-large mt-2">
+                Save time and secure your prescriptions! With our app, doctors send their prescriptions directly
+                to pharmacists, so patients receive their medications quickly and safely.
+            </p>
+
+
+            <div class="relative mt-10 overflow-hidden rounded-md w-full">
+                <div class="flex h-72 transition-transform duration-700 ease-in-out"
+                     style="@($"transform: translateX(-{CurrentIndex * 100}%);")">
+                    @foreach (var img in Images)
+                    {
+                        <img src="@img" class="w-full h-full object-cover flex-shrink-0 mt-6" />
+                    }
+                </div>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label>Mot de passe</label>
-            <InputText type="password" class="form-control" @bind-Value="loginModel.Password" />
+        <!-- Right: Form -->
+        <div class="md:w-1/2 w-full p-8 py-14">
+
+            <EditForm Model="loginModel" OnValidSubmit="HandleLogin" class="space-y-6">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-red-500" />
+
+                <!-- Logo -->
+                <div class="w-64 mx-auto flex justify-center">
+                    <img src="images/logo.png" alt="Logo" class="mb-2 w-64" />
+                </div>
+
+                <!-- INPUTS -->
+                <div>
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <input type="email" placeholder="Email"
+                               @bind-value="loginModel.Email"
+                               required
+                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
+                   focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
+                   dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
+                   transition duration-300" />
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-4">
+                        <input type="password" placeholder="Password"
+                               @bind-value="loginModel.Password"
+                               required
+                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
+                   focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
+                   dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
+                   transition duration-300" />
+                    </div>
+                </div>
+
+                <!-- Error message -->
+                @if (!string.IsNullOrEmpty(Message))
+                {
+                    <p class="text-red-500 text-center">@Message</p>
+                }
+
+                @if (loginFailed)
+                {
+                    <p class="text-red-500 text-center mt-2">Email ou mot de passe incorrect.</p>
+                }
+
+                <button style="background-color:#50bfa2;"
+                        class="mt-2 w-full h-12 px-3 py-2 text-white font-semibold rounded-md transition-all duration-300 hover:scale-[1.02] hover:brightness-110">
+                    Sign In
+                </button>
+
+                <!-- Sign up link -->
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+                    Don’t have an account?
+                    <a href="/Authentification/Inscription" style="color:#50bfa2;" class="hover:underline transition duration-300">Sign up</a>
+                </p>
+            </EditForm>
         </div>
+    </div>
+</section>
 
-        <button class="btn btn-primary w-100">Se connecter</button>
-        <button class="btn btn-primary" @onclick="GoToHome">Retour à l'inscription</button>
-
-        @if (loginFailed)
-        {
-            <p class="text-danger mt-2">Email ou mot de passe incorrect.</p>
-        }
-    </EditForm>
-</div>
 
 @code {
-    private LoginDTO loginModel = new LoginDTO(); 
+    private LoginDTO loginModel = new LoginDTO();
     private bool loginFailed = false;
-    private void GoToHome()
+    private string Message;
+
+    private int CurrentIndex = 0;
+    private List<string> Images = new()
     {
-        navigationManager.NavigateTo("/");
+        "images/ph2.png",
+        "images/ph4.png",
+        "images/ph6.png"
+    };
+
+    protected override void OnInitialized()
+    {
+        var timer = new System.Timers.Timer(3000);
+        timer.Elapsed += (s, e) =>
+        {
+            CurrentIndex = (CurrentIndex + 1) % Images.Count;
+            InvokeAsync(StateHasChanged);
+        };
+        timer.Start();
     }
+
     private async Task HandleLogin()
     {
         loginFailed = false;
@@ -43,11 +126,73 @@
 
         if (success)
         {
-            navigationManager.NavigateTo("/");    // Redirection tableau de bord
+            // Récupérer le rôle depuis le localStorage (ou depuis LoginResult si tu le stockes)
+            var role = await JS.InvokeAsync<string>("localStorage.getItem", "role");
+
+            if (role == "Medecin")
+            {
+                navigationManager.NavigateTo("/Patients/ListPatients"); // Page des patients pour médecin
+            }
+            else if (role == "Pharmacien")
+            {
+                navigationManager.NavigateTo("/Medicamants/ListMedicaments"); // Page des médicaments pour pharmacien
+            }
+          
         }
         else
         {
             loginFailed = true;
         }
     }
+
+
 }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
