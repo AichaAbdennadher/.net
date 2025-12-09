@@ -13,7 +13,7 @@ namespace projet.Repositories
             this.context = context;
         }
 
-        public async Task<List<LigneMedicament>> GetLignesMedicamentPharmacien(int pharmacienId)
+        public async Task<List<LigneMedicament>> GetLignesMedicamentPharmacien(Guid pharmacienId)
         {
             return await context.lignesMedicaments
                                 .Include(lm => lm.Medicament) // Inclut le médicament pour accéder à son UserID et stock

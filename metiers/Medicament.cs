@@ -21,10 +21,8 @@ namespace metiers
         public int Stock { get; set; }
 
         // --- Relation 1-*
-        public int UserID { get; set; }
-        [ForeignKey("UserID")]
-        public virtual User User { get; set; }
-        public virtual ICollection<LigneMedicament> LignesMedicaments { get; set; }
+        public Guid UserID { get; set; }
+        public virtual ICollection<LigneMedicament> LigneMedicaments { get; set; }
 
 
     }

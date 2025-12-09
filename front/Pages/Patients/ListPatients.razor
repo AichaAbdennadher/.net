@@ -1,0 +1,128 @@
+﻿@page "/Patients/ListPatients"
+@using metiers
+@inject NavigationManager Navigation
+@inject PatientServices PatientServices
+@inject IJSRuntime JS
+
+<HeaderM/>
+
+<section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5">
+    <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
+        <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+
+            <div class="flex flex-col md:flex-row items-center justify-between p-4 gap-4 bg-white">
+
+                <!-- Search (ASM style) -->
+                <div class="w-full md:w-1/2 relative">
+                    <input type="text"
+                           @bind="SearchText"
+                           placeholder="Search"
+                           class="w-full bg-white border border-gray-300 text-gray-700 text-sm rounded-xl pl-11 py-2.5
+                      focus:border-gray-400 focus:ring-0 shadow-sm" />
+
+                    <!-- Icon -->
+                    <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500">
+                        <i class="fas fa-search text-[15px]"></i>
+                    </span>
+                </div>
+
+              
+                <!-- Bouton créer patient --> <div class="w-full md:w-auto flex justify-end">
+                    <button class="flex items-center justify-center text-white font-medium rounded-lg text-base px-4 py-2 bg-[#50bfa2] hover:bg-[#95dbc8]" @onclick="CreerPatient"> 
+                        <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20"> <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /> </svg> Add Patient 
+                        </button> </div>
+            </div>
+
+
+            <!-- Table Patients -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th class="px-4 py-3">Number</th>
+                            <th class="px-4 py-3">Last Name</th>
+                            <th class="px-4 py-3">First Name</th>
+                            <th class="px-4 py-3">Date of Birth</th>
+                            <th class="px-4 py-3">Phone</th>
+                            <th class="px-4 py-3">Address</th>
+                            <th class="px-4 py-3" colspan="2">Actions</th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        @foreach (var patient in FilteredPatients)
+                        {
+                            <tr class="border-b dark:border-gray-700">
+                                <td class="px-4 py-3">@patient.PatientID</td>
+                                <td class="px-4 py-3">@patient.Nom</td>
+                                <td class="px-4 py-3">@patient.Prenom</td>
+                                <td class="px-4 py-3">@patient.DateNaissance.ToShortDateString()</td>
+                                <td class="px-4 py-3">@patient.Tel</td>
+                                <td class="px-4 py-3">@patient.Adresse</td>
+                                <td class="px-4 py-3 flex space-x-2">
+                                    <!-- Modifier -->
+                                    <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
+                                          @onclick="() => Edit(patient.PatientID)">
+                                        <i class='bx bx-edit text-gray-500 text-2xl'></i>
+                                    </span>
+
+                                    <!-- Supprimer -->
+                                    <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
+                                          @onclick="() => Delete(patient.PatientID)">
+                                        <i class='bx bxs-trash text-[#50bfa2] text-2xl'></i>
+                                    </span>
+                                </td>
+
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+</section>
+
+@code {
+    private List<Patient> Patients { get; set; } = new();
+    private string SearchText { get; set; } = "";
+
+    private IEnumerable<Patient> FilteredPatients =>
+        string.IsNullOrWhiteSpace(SearchText)
+        ? Patients
+        : Patients.Where(p => p.Nom.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
+                           || p.Prenom.Contains(SearchText, StringComparison.OrdinalIgnoreCase)
+                           || p.Adresse.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPatients();
+    }
+
+    private async Task LoadPatients()
+    {
+        string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+        medecinIdString = medecinIdString?.Trim('"', '{', '}');
+
+        Patients = await PatientServices.GetPatients(medecinIdString);
+    }
+
+    private async Task Delete(int patientId)
+    {
+        bool result = await PatientServices.DeletePatient(patientId);
+        if (result)
+        {
+            await LoadPatients();
+        }
+    }
+
+    private void Edit(int patientId)
+    {
+        Navigation.NavigateTo($"/Patients/Edit/{patientId}");
+    }
+
+    private void CreerPatient()
+    {
+        Navigation.NavigateTo("/Patients/Create");
+    }
+}

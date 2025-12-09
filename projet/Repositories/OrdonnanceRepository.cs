@@ -25,9 +25,9 @@ namespace projet.Repositories
             return Ordonnance;
         }
 
-        public async Task<List<Ordonnance>> GetOrdonnancesByMedecin(int medecinId)
+        public async Task<List<Ordonnance>> GetOrdonnancesByMedecin(Guid medecinId)
         {
-            return await context.ordonnances.Where(p => p.PharmacienID== medecinId).ToListAsync();
+            return await context.ordonnances.Where(p => p.PharmacienID == medecinId).ToListAsync();
         }
 
         public async Task<Ordonnance> GetOrdonnance(int id)
@@ -36,13 +36,13 @@ namespace projet.Repositories
         }
 
         /// /////
-        public async Task<bool> UpdateOrdonnance(Ordonnance Ordonnance) 
+        public async Task<bool> UpdateOrdonnance(Ordonnance Ordonnance)
         {
             var dep = await context.ordonnances.FindAsync(Ordonnance.OrdID);
             if (dep == null)
                 return false;
             dep.PatientID = Ordonnance.PatientID;
-            dep.LigneMedicaments = Ordonnance.LigneMedicaments; 
+            dep.LigneMedicaments = Ordonnance.LigneMedicaments;
             await context.SaveChangesAsync();
             return true;
         }
@@ -57,28 +57,28 @@ namespace projet.Repositories
             var dep = await context.ordonnances.FindAsync(Ordonnance.OrdID);
             if (dep == null)
                 return false;
-            dep.envoyee= true;
+            dep.envoyee = true;
             await context.SaveChangesAsync();
             return true;
 
         }
 
         //Dashboard pharmcien
-        public async Task<int> GetNbreOrdonnance(int userId)
+        public async Task<int> GetNbreOrdonnance(Guid userId)
         {
             return await context.ordonnances
                                 .CountAsync(o => o.PharmacienID == userId);
         }
 
-        public async Task<int> GetNbreOrdonnanceLivree(int userId)
+        public async Task<int> GetNbreOrdonnanceLivree(Guid userId)
         {
             return await context.ordonnances
-                                .CountAsync(o => o.PharmacienID== userId
+                                .CountAsync(o => o.PharmacienID == userId
                                               && o.Statut == Statut.Delivree);
         }
 
 
-        public async Task<int> GetNbreOrdonnanceNonLivree(int userId)
+        public async Task<int> GetNbreOrdonnanceNonLivree(Guid userId)
         {
             return await context.ordonnances
                                 .CountAsync(o => o.PharmacienID == userId
@@ -86,28 +86,32 @@ namespace projet.Repositories
                                                   || o.Statut == Statut.PartiellementDelivree));
         }
 
-        public async Task<List<OrdonnanceInfoDTO>> GetDernieresOrdonnancesPharmacien(int pharmacienId) 
+        public async Task<List<OrdonnanceInfoDTO>> GetDernieresOrdonnancesPharmacien(Guid pharmacienId)
         {
             return await context.ordonnances
                 .Include(o => o.Patient)
-                .Include(o => o.Medecin)
-                .Where(o => o.PharmacienID == pharmacienId)
-                .OrderByDescending(o => o.DateCreation)
+                .Join(context.users,
+                o => o.MedecinID.ToString(),
+                u => u.Id,
+                (o, u) => new { o, Medecin = u })
+                .Where(x => x.o.PharmacienID == pharmacienId)
+                .OrderByDescending(x => x.o.DateCreation)
                 .Take(5)
-                .Select(o => new OrdonnanceInfoDTO
+                .Select(x => new OrdonnanceInfoDTO
                 {
-                    OrdonnanceID = o.OrdID,
-                    PatientNom = o.Patient.Nom,
-                    PatientPrenom = o.Patient.Prenom,
-                    MedecinNom = o.Medecin.Nom,
-                    MedecinPrenom = o.Medecin.Prenom,
-                    Statut = o.Statut,
-                    DateCreation = o.DateCreation
+                    OrdonnanceID = x.o.OrdID,
+                    PatientNom = x.o.Patient.Nom,
+                    PatientPrenom = x.o.Patient.Prenom,
+                    MedecinNom = x.Medecin.Nom,
+                    MedecinPrenom = x.Medecin.Prenom,
+                    Statut = x.o.Statut,
+                    DateCreation = x.o.DateCreation
                 })
                 .ToListAsync();
+
         }
 
-        public async Task<List<OrdonnanceParMoisDTO>> GetOrdonnancesParMoisPharmacien(int pharmacienId, int annee)
+        public async Task<List<OrdonnanceParMoisDTO>> GetOrdonnancesParMoisPharmacien(Guid pharmacienId, int annee)
         {
             return await context.ordonnances
                 .Where(o => o.PharmacienID == pharmacienId && o.DateCreation.Year == annee)

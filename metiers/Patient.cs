@@ -33,12 +33,9 @@ namespace metiers
         [StringLength(200)]
         public string Adresse { get; set; }
 
-        public virtual ICollection<Ordonnance> Ordonnances { get; set; }
 
         //realtion 1-*
-        public int MedecinID { get; set; }
-        [ForeignKey("UserID")]
-        public virtual User medecin { get; set; }
+        public Guid MedecinID { get; set; }
 
     }
 }

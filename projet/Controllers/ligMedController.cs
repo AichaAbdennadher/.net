@@ -17,7 +17,7 @@ namespace projet.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetligMeds(int id)
+        public async Task<IActionResult> GetligMeds(Guid id)
         {
             var ligMeds = await repository.GetLignesMedicamentPharmacien(id);
             return Ok(ligMeds);

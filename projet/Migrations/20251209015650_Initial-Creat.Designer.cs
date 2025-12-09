@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace projet.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20251206214553_Initial-Create")]
-    partial class InitialCreate
+    [Migration("20251209015650_Initial-Creat")]
+    partial class InitialCreat
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -216,12 +216,10 @@ namespace projet.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("MedicamentID");
-
-                    b.HasIndex("UserID");
 
                     b.ToTable("medicaments");
                 });
@@ -237,14 +235,14 @@ namespace projet.Migrations
                     b.Property<DateTime>("DateCreation")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MedecinID")
-                        .HasColumnType("int");
+                    b.Property<Guid>("MedecinID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PatientID")
                         .HasColumnType("int");
 
-                    b.Property<int>("PharmacienID")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PharmacienID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Statut")
                         .HasColumnType("int");
@@ -254,11 +252,7 @@ namespace projet.Migrations
 
                     b.HasKey("OrdID");
 
-                    b.HasIndex("MedecinID");
-
                     b.HasIndex("PatientID");
-
-                    b.HasIndex("PharmacienID");
 
                     b.ToTable("ordonnances");
                 });
@@ -284,8 +278,8 @@ namespace projet.Migrations
                     b.Property<DateTime>("DateNaissance")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MedecinID")
-                        .HasColumnType("int");
+                    b.Property<Guid>("MedecinID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Nom")
                         .IsRequired()
@@ -300,61 +294,10 @@ namespace projet.Migrations
                     b.Property<string>("Tel")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
 
                     b.HasKey("PatientID");
 
-                    b.HasIndex("UserID");
-
                     b.ToTable("patients");
-                });
-
-            modelBuilder.Entity("metiers.User", b =>
-                {
-                    b.Property<int>("UserID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
-
-                    b.Property<string>("Adresse")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NomPharmacie")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Prenom")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Specialite")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Tel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserID");
-
-                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("projet.Data.ApplicationUser", b =>
@@ -450,7 +393,7 @@ namespace projet.Migrations
             modelBuilder.Entity("LigneMedicament", b =>
                 {
                     b.HasOne("metiers.Medicament", "Medicament")
-                        .WithMany("LignesMedicaments")
+                        .WithMany("LigneMedicaments")
                         .HasForeignKey("MedicamentID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -517,58 +460,20 @@ namespace projet.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("metiers.Medicament", b =>
-                {
-                    b.HasOne("metiers.User", "User")
-                        .WithMany("medicaments")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("metiers.Ordonnance", b =>
                 {
-                    b.HasOne("metiers.User", "Medecin")
-                        .WithMany("OrdonnancesCreees")
-                        .HasForeignKey("MedecinID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("metiers.Patient", "Patient")
                         .WithMany("Ordonnances")
                         .HasForeignKey("PatientID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("metiers.User", "Pharmacien")
-                        .WithMany()
-                        .HasForeignKey("PharmacienID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Medecin");
-
                     b.Navigation("Patient");
-
-                    b.Navigation("Pharmacien");
-                });
-
-            modelBuilder.Entity("metiers.Patient", b =>
-                {
-                    b.HasOne("metiers.User", "medecin")
-                        .WithMany("patients")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("medecin");
                 });
 
             modelBuilder.Entity("metiers.Medicament", b =>
                 {
-                    b.Navigation("LignesMedicaments");
+                    b.Navigation("LigneMedicaments");
                 });
 
             modelBuilder.Entity("metiers.Ordonnance", b =>
@@ -579,15 +484,6 @@ namespace projet.Migrations
             modelBuilder.Entity("metiers.Patient", b =>
                 {
                     b.Navigation("Ordonnances");
-                });
-
-            modelBuilder.Entity("metiers.User", b =>
-                {
-                    b.Navigation("OrdonnancesCreees");
-
-                    b.Navigation("medicaments");
-
-                    b.Navigation("patients");
                 });
 #pragma warning restore 612, 618
         }

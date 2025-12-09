@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using metiers.shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Extensions;
 using projet.Data;
 using projet.DTO;
 using System.IdentityModel.Tokens.Jwt;
@@ -69,7 +71,7 @@ public class AccountController : ControllerBase
 
     // ------------------------ LOGIN ------------------------
     [HttpPost("Login")]
-    public async Task<IActionResult> Login(LoginDTO loginDTO)
+    public async Task<IActionResult> Login(projet.DTO.LoginDTO loginDTO)
     {
         var user = await userManager.FindByEmailAsync(loginDTO.Email);
         if (user == null)
@@ -97,18 +99,18 @@ public class AccountController : ControllerBase
             issuer: configuration["JWT:Issuer"],
             audience: configuration["JWT:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddHours(24),
             signingCredentials: creds
         );
-
-        return Ok(new
+        var finalToken = new JwtSecurityTokenHandler().WriteToken(token);
+        var result = new
         {
-            token = new JwtSecurityTokenHandler().WriteToken(token),
-            expiration = token.ValidTo,
+            token = finalToken,
             email = user.Email,
             id = user.Id,
-            role = user.UserRole.ToString()
-        });
+            role = user.UserRole.GetDisplayName()
+        };
+        return Ok(result);
     }
 
     // ------------------------ GET CURRENT USER ------------------------
@@ -122,18 +124,16 @@ public class AccountController : ControllerBase
 
         if (user == null)
             return NotFound();
-
-        return Ok(new
+        return Ok(new UserDTO()
         {
-            user.Id,
-            user.Email,
-            user.Nom,
-            user.Prenom,
-            user.Tel,
-            user.Adresse,
-            user.Specialite,
-            user.NomPharmacie,
-            Role = user.UserRole.ToString()
+           Email = user.Email,
+           Nom = user.Nom,
+           Adresse = user.Adresse,
+           NomPharmacie = user.NomPharmacie,
+           Prenom = user.Prenom,
+           Specialite = user.Specialite,
+           Tel = user.Tel,
+
         });
     }
 }

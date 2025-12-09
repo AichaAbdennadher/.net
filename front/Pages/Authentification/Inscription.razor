@@ -1,5 +1,5 @@
 ﻿@page "/Authentification/Inscription"
-@inject userServices userServices
+@inject UserServices userServices
 @inject NavigationManager navigationManager
 @inject IJSRuntime JS
 
@@ -47,7 +47,7 @@
 
                     <!-- Name -->
                     <div class="mb-4">
-                        <input placeholder="Name"
+                        <input placeholder="Last Name"
                                @bind-value="UserDTO.Nom"
                                required
                                class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
@@ -58,7 +58,7 @@
 
                     <!-- First name -->
                     <div class="mb-4">
-                        <input placeholder="First name"
+                        <input placeholder="First Name"
                                @bind-value="UserDTO.Prenom"
                                required
                                class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md

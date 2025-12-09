@@ -1,5 +1,5 @@
 ﻿@page "/Authentification/Login"
-@inject userServices UserServices
+@inject UserServices UserServices
 @inject NavigationManager navigationManager
 @inject IJSRuntime JS
 
@@ -17,7 +17,6 @@
                 Save time and secure your prescriptions! With our app, doctors send their prescriptions directly
                 to pharmacists, so patients receive their medications quickly and safely.
             </p>
-
 
             <div class="relative mt-10 overflow-hidden rounded-md w-full">
                 <div class="flex h-72 transition-transform duration-700 ease-in-out"
@@ -68,17 +67,13 @@
                 </div>
 
                 <!-- Error message -->
-                @if (!string.IsNullOrEmpty(Message))
-                {
-                    <p class="text-red-500 text-center">@Message</p>
-                }
-
                 @if (loginFailed)
                 {
                     <p class="text-red-500 text-center mt-2">Email ou mot de passe incorrect.</p>
                 }
 
-                <button style="background-color:#50bfa2;"
+                <button type="submit"
+                        style="background-color:#50bfa2;"
                         class="mt-2 w-full h-12 px-3 py-2 text-white font-semibold rounded-md transition-all duration-300 hover:scale-[1.02] hover:brightness-110">
                     Sign In
                 </button>
@@ -93,11 +88,9 @@
     </div>
 </section>
 
-
 @code {
     private LoginDTO loginModel = new LoginDTO();
     private bool loginFailed = false;
-    private string Message;
 
     private int CurrentIndex = 0;
     private List<string> Images = new()
@@ -122,77 +115,30 @@
     {
         loginFailed = false;
 
+        // Appel à la méthode Login de ton service
         var success = await UserServices.Login(loginModel);
 
-        if (success)
-        {
-            // Récupérer le rôle depuis le localStorage (ou depuis LoginResult si tu le stockes)
-            var role = await JS.InvokeAsync<string>("localStorage.getItem", "role");
-
-            if (role == "Medecin")
-            {
-                navigationManager.NavigateTo("/Patients/ListPatients"); // Page des patients pour médecin
-            }
-            else if (role == "Pharmacien")
-            {
-                navigationManager.NavigateTo("/Medicamants/ListMedicaments"); // Page des médicaments pour pharmacien
-            }
-          
-        }
-        else
+        if (!success)
         {
             loginFailed = true;
+            return;
+        }
+
+        // Récupérer le rôle depuis Blazored.LocalStorage
+        var role = await UserServices.GetRoleAsync();
+
+        await UserServices.AddJwtHeaderAsync();
+        // Sécuriser la redirection selon le rôle
+        if (role?.Equals("Medecin", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            // Redirige vers la liste des patients
+            navigationManager.NavigateTo("/Patients/ListPatients", forceLoad: true);
+        }
+        else if (role?.Equals("Pharmacien", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            // Redirige vers la liste des médicaments
+            navigationManager.NavigateTo("/Medicamants/ListMedicaments", forceLoad: true);
         }
     }
 
-
 }
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,12 +1,12 @@
 ﻿using metiers;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using projet.Data;
 
-public class ApplicationContext : IdentityDbContext<ApplicationUser>
+public class ApplicationContext : IdentityDbContext<projet.Data.ApplicationUser>
 {
     public ApplicationContext(DbContextOptions options) : base(options) { }
 
+    public DbSet<projet.Data.ApplicationUser> users { get; set; }
     public DbSet<Medicament> medicaments { get; set; }
     public DbSet<Patient> patients { get; set; }
     public DbSet<Ordonnance> ordonnances { get; set; }
@@ -15,25 +15,7 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(modelBuilder);
 
-        // Ordonnance → Medecin / Pharmacien : NO ACTION
-        modelBuilder.Entity<Ordonnance>()
-            .HasOne(o => o.Medecin)
-            .WithMany(u => u.OrdonnancesCreees)
-            .HasForeignKey(o => o.MedecinID)
-            .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<Ordonnance>()
-            .HasOne(o => o.Pharmacien)
-            .WithMany()
-            .HasForeignKey(o => o.PharmacienID)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        // Ordonnance → Patient : NO ACTION
-        modelBuilder.Entity<Ordonnance>()
-            .HasOne(o => o.Patient)
-            .WithMany(p => p.Ordonnances)
-            .HasForeignKey(o => o.PatientID)
-            .OnDelete(DeleteBehavior.NoAction);
 
         // LigneMedicament → Ordonnance : CASCADE
         modelBuilder.Entity<LigneMedicament>()
@@ -45,7 +27,7 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
         // LigneMedicament → Medicament : NO ACTION
         modelBuilder.Entity<LigneMedicament>()
             .HasOne(l => l.Medicament)
-            .WithMany(m => m.LignesMedicaments)
+            .WithMany(m => m.LigneMedicaments)
             .HasForeignKey(l => l.MedicamentID)
             .OnDelete(DeleteBehavior.NoAction);
     }

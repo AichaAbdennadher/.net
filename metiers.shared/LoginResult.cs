@@ -9,7 +9,6 @@ namespace metiers.shared
         public string token { get; set; }
         public string email { get; set; }
         public string id { get; set; }
-        public DateTime expiration { get; set; }
         // Ajouter le rôle de l'utilisateur
         public string role { get; set; } // "Medecin" ou "Pharmacien"
     }

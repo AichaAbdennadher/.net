@@ -14,47 +14,49 @@ namespace projet.Controllers
     public UserController(IUserRepository repository)
     {
         this.repository = repository;
-    }
+        }
 
         // 🔥 Pharmaciens
-        //[Authorize("Medecin")]
-        //[HttpGet("pharmaciens")]
-        //public async Task<IActionResult> GetPharmaciens()
-        //{
-        //    var pharmaciens = await repository.GetPharmaciens();
+        [Authorize("Medecin")]
+        [HttpGet("pharmaciens")]
+        public async Task<IActionResult> GetPharmaciens()
+        {
+            var pharmaciens = await repository.GetPharmaciens();
 
-        //    var result = pharmaciens.Select(u => new {
-        //        u.UserID,
-        //        u.Nom,
-        //        u.Prenom,
-        //        u.Email,
-        //        u.Tel,
-        //        u.NomPharmacie
-        //    });
+            var result = pharmaciens.Select(u => new
+            {
+                userId = u.Id,
+                u.Nom,
+                u.Prenom,
+                u.Email,
+                u.Tel,
+                u.NomPharmacie
+            });
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
-        //// 🔥 Médecins sauf connecté
-        //[Authorize("Pharmacien")]
-        //[HttpGet("medecins")]
-        //public async Task<IActionResult> GetMedecinsExceptConnected()
-        //{
-        //    var idFromToken = int.Parse(User.FindFirst("id").Value);
+        // 🔥 Médecins sauf connecté
+        [Authorize("Pharmacien")]
+        [HttpGet("medecins")]
+        public async Task<IActionResult> GetMedecinsExceptConnected()
+        {
+            Guid idFromToken = Guid.Parse(User.FindFirst("id").Value);
 
-        //    var medecins = await repository.GetMedecinsExcept(idFromToken);
+            var medecins = await repository.GetMedecinsExcept(idFromToken);
 
-        //    var result = medecins.Select(u => new {
-        //        u.UserID,
-        //        u.Nom,
-        //        u.Prenom,
-        //        u.Email,
-        //        u.Tel,
-        //        u.Specialite
-        //    });
+            var result = medecins.Select(u => new
+            {
+                userId = u.Id,
+                u.Nom,
+                u.Prenom,
+                u.Email,
+                u.Tel,
+                u.Specialite
+            });
 
-        //    return Ok(result);
-        //}
+            return Ok(result);
+        }
 
 
     }

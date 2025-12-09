@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using projet.Data;
+using projet.DTO;
 
 namespace projet.Repositories
 {
@@ -15,18 +16,18 @@ namespace projet.Repositories
             this.context = context;
         }
 
-        //public async Task<IEnumerable<User>> GetPharmaciens()
-        //{
-        //    return await context.users
-        //        .Where(u => u.Role == Role.Pharmacien)
-        //        .ToListAsync();
-        //}
+        public async Task<IEnumerable<ApplicationUser>> GetPharmaciens()
+        {
+            return await context.users
+                .Where(u => u.UserRole == Role.Pharmacien)
+                .ToListAsync();
+        }
 
-        //public async Task<IEnumerable<User>> GetMedecinsExcept(int idMedecin)
-        //{
-        //    return await context.users
-        //        .Where(u => u.Role == Role.Medecin && u.UserID != idMedecin)
-        //        .ToListAsync();
-        //}
+        public async Task<IEnumerable<ApplicationUser>> GetMedecinsExcept(Guid idMedecin)
+        {
+            return await context.users
+                .Where(u => u.UserRole == Role.Medecin && u.Id != idMedecin.ToString())
+                .ToListAsync();
+        }
     }
 }

@@ -1,0 +1,113 @@
+﻿@page "/Patients/Create"
+@using System.ComponentModel.DataAnnotations
+@using metiers
+@inject PatientServices PatientServices
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b">
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Create New Patient</h3>
+            <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <EditForm Model="Patient" OnValidSubmit="HandleSubmit" class="px-6 py-4 space-y-4">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-red-500" />
+
+            <!-- CIN -->
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">CIN</label>
+                <InputText @bind-Value="Patient.CIN" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @* <ValidationMessage For="@(() => Patient.CIN)" class="text-red-500 text-sm" /> *@
+            </div>
+
+            <!-- Last Name -->
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">Last Name</label>
+                <InputText @bind-Value="Patient.Nom" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @* <ValidationMessage For="@(() => Patient.Nom)" class="text-red-500 text-sm" /> *@
+            </div>
+
+            <!-- First Name -->
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">First Name</label>
+                <InputText @bind-Value="Patient.Prenom" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @* <ValidationMessage For="@(() => Patient.Prenom)" class="text-red-500 text-sm" /> *@
+            </div>
+
+            <!-- Date of Birth -->
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">Date of Birth</label>
+                <InputDate @bind-Value="Patient.DateNaissance" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @* <ValidationMessage For="@(() => Patient.DateNaissance)" class="text-red-500 text-sm" /> *@
+            </div>
+
+            <!-- Phone -->
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">Phone</label>
+                <InputText @bind-Value="Patient.Tel" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @* <ValidationMessage For="@(() => Patient.Tel)" class="text-red-500 text-sm" /> *@
+            </div>
+
+            <!-- Address -->
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">Address</label>
+                <InputText @bind-Value="Patient.Adresse" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @* <ValidationMessage For="@(() => Patient.Adresse)" class="text-red-500 text-sm" /> *@
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button type="button" @onclick="Cancel" class="bg-gray-300 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-normal text-[#6f7885]">Cancel</button>
+                <button type="submit" class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-5 py-2.5 rounded-lg text-sm font-medium">Save</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Patient Patient { get; set; } = new Patient
+    {
+        DateNaissance = DateTime.Today
+    };
+    protected override async Task OnInitializedAsync()
+    {
+        string medId = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+
+        // Nettoyage des caractères parasites
+        medId = medId?.Trim('"', '{', '}', ' ');
+
+        Console.WriteLine($"🟡 medId reçu depuis localStorage = {medId}");
+
+        if (Guid.TryParse(medId, out Guid guid))
+        {
+            Patient.MedecinID = guid;
+            Console.WriteLine($"🟢 MedecinID assigné = {Patient.MedecinID}");
+        }
+        else
+        {
+            Console.WriteLine("❌ ERREUR : La valeur userId n'est pas un GUID valide !");
+        }
+    }
+
+
+    private async Task HandleSubmit()
+    {
+        var result = await PatientServices.CreatePatient(Patient);
+        if (result != null)
+            Navigation.NavigateTo("/Patients/ListPatients");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/Patients/ListPatients");
+    }
+}

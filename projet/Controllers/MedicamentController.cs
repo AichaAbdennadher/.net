@@ -18,14 +18,14 @@ namespace projet.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMedicaments(int id)
+        public async Task<IActionResult> GetMedicaments(Guid id)
         {
             var Medicaments = await repository.GetMedicamentsPharmacien(id);
             return Ok(Medicaments);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMedicament(Medicament Medicament,int id)
+        public async Task<IActionResult> CreateMedicament(Medicament Medicament, Guid id)
         {
             List<Medicament> Medicaments = await repository.GetMedicamentsPharmacien( id);
             if (Medicaments.Any(d => d.Nom.Equals(Medicament.Nom)))

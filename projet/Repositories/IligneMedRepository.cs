@@ -4,7 +4,7 @@ namespace projet.Repositories
 {
     public interface IligneMedRepository
     {
-        Task<List<LigneMedicament>> GetLignesMedicamentPharmacien(int id);
+        Task<List<LigneMedicament>> GetLignesMedicamentPharmacien(Guid id);
 
         Task<LigneMedicament> GetligneMedicament(int id); //pour pop up de qte delivrée
 

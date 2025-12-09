@@ -1,11 +1,12 @@
 ﻿using metiers;
+using projet.Data;
 
 namespace projet.Repositories
 {
     public interface IUserRepository
     {
-        //Task<IEnumerable<User>> GetPharmaciens();
-        //Task<IEnumerable<User>> GetMedecinsExcept(int idMedecin);
+        Task<IEnumerable<ApplicationUser>> GetPharmaciens();
+        Task<IEnumerable<ApplicationUser>> GetMedecinsExcept(Guid idMedecin);
 
     }
 }

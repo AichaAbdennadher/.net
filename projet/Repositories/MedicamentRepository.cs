@@ -24,7 +24,7 @@ namespace projet.Repositories
             return Medicament;
         }
 
-        public async Task<List<Medicament>> GetMedicamentsPharmacien(int id)
+        public async Task<List<Medicament>> GetMedicamentsPharmacien(Guid id)
         {
             return await context.medicaments
                                .Where(m => m.UserID == id)   

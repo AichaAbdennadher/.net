@@ -19,7 +19,7 @@ namespace projet.Controllers
 
 
         [HttpGet("medecin/{medecinId}")]
-        public async Task<IActionResult> GetOrdonnancesByMedecin(int medecinId)
+        public async Task<IActionResult> GetOrdonnancesByMedecin(Guid medecinId)
         {
             var Ordonnances = await repository.GetOrdonnancesByMedecin(medecinId);
             return Ok(Ordonnances);
@@ -33,7 +33,7 @@ namespace projet.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrdonnance(Ordonnance Ordonnance, int medecinId)
+        public async Task<IActionResult> CreateOrdonnance(Ordonnance Ordonnance, Guid medecinId)
         {
             List<Ordonnance> Ordonnances = await repository.GetOrdonnancesByMedecin(medecinId);
             if (Ordonnances.Any(d => d.OrdID == Ordonnance.OrdID))
@@ -69,7 +69,7 @@ namespace projet.Controllers
         }
 
         [HttpGet("pharmacien/{id}/dernieres")]
-        public async Task<IActionResult> GetDernieresOrdonnancesPharmacien(int id)
+        public async Task<IActionResult> GetDernieresOrdonnancesPharmacien(Guid id)
         {
             var result = await repository.GetDernieresOrdonnancesPharmacien(id);
 
@@ -80,7 +80,7 @@ namespace projet.Controllers
         }
 
         [HttpGet("pharmacien/{pharmacienId}/statistiques/mois/{annee}")]
-        public async Task<IActionResult> GetOrdonnancesParMoisPharmacien(int pharmacienId, int annee)
+        public async Task<IActionResult> GetOrdonnancesParMoisPharmacien(Guid pharmacienId, int annee)
         {
             var result = await repository.GetOrdonnancesParMoisPharmacien(pharmacienId, annee);
 

@@ -23,10 +23,10 @@ namespace projet.Repositories
             await context.SaveChangesAsync();
             return patient;
         }
-        public async Task<List<Patient>> GetPatientsByMedecin(int medecinId)
+        public async Task<List<Patient>> GetPatientsByMedecin(Guid medecinId)
         {
             return await context.patients
-                .Where(p => p.MedecinID == medecinId)
+                .Where(p => p.MedecinID.Equals( medecinId))
                 .ToListAsync();
         }
 
@@ -44,6 +44,15 @@ namespace projet.Repositories
             dep.Prenom = Patient.Prenom;
             dep.Tel = Patient.Tel;
             dep.Adresse = Patient.Adresse;
+            await context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> DeletePatient(int id)
+        {
+            var dep = await context.patients.FindAsync(id);
+            if (dep == null)
+                return false;
+            context.patients.Remove(dep);
             await context.SaveChangesAsync();
             return true;
         }

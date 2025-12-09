@@ -1,7 +1,10 @@
 ﻿@page "/"
+@inject NavigationManager Nav
 
-<PageTitle>Home</PageTitle>
+@code {
+    protected override void OnInitialized()
+    {
+        Nav.NavigateTo("/Authentification/Inscription", true);
+    }
+}
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.

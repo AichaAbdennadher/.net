@@ -1,32 +1,54 @@
-﻿using metiers.shared;
+﻿using Blazored.LocalStorage;
 using Microsoft.JSInterop;
+using metiers.shared;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace front.Services
 {
-    public class userServices
+    public class UserServices
     {
-        private readonly HttpClient httpclient; //pour la communication avec le backend
-        private readonly IJSRuntime _js;
+        private readonly HttpClient _httpClient;
+        private readonly ILocalStorageService _localStorage;
 
-        public userServices(HttpClient httpClient, IJSRuntime js)
+        public UserServices (HttpClient httpClient, ILocalStorageService localStorage)
         {
-            this.httpclient = httpClient;
-            _js = js ?? throw new ArgumentNullException(nameof(js));
+            _httpClient = httpClient;
+            _localStorage = localStorage;
+        }
 
+        // Sauvegarde du token et infos dans le localStorage
+        private async Task SaveUserDataAsync(LoginResult result)
+        {
+            await _localStorage.SetItemAsync("token", result.token);
+            await _localStorage.SetItemAsync("email", result.email);
+            await _localStorage.SetItemAsync("userId", result.id);
+            await _localStorage.SetItemAsync("role", result.role);
+            await AddJwtHeaderAsync();
+        }
+
+        // Ajoute le JWT dans l'en-tête Authorization
+        public async Task AddJwtHeaderAsync( )
+        {
+            var token = await _localStorage.GetItemAsync<string>("token");
+            if (!string.IsNullOrEmpty(token))
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            else
+                _httpClient.DefaultRequestHeaders.Authorization = null;
         }
 
         public async Task<bool> Register(UserDTO newUser)
         {
-            var response = await httpclient.PostAsJsonAsync("api/Account/Register", newUser);
+            var response = await _httpClient.PostAsJsonAsync("api/Account/Register", newUser);
             return response.IsSuccessStatusCode;
         }
+
         public async Task<bool> Login(LoginDTO loginDTO)
         {
             if (loginDTO == null) return false;
 
-            var response = await httpclient.PostAsJsonAsync("api/Account/login", loginDTO);
+            var response = await _httpClient.PostAsJsonAsync("api/Account/Login", loginDTO);
 
             if (!response.IsSuccessStatusCode)
                 return false;
@@ -34,20 +56,34 @@ namespace front.Services
             var result = await response.Content.ReadFromJsonAsync<LoginResult>();
             if (result == null) return false;
 
-            // Sauvegarder dans localStorage
-            await _js.InvokeVoidAsync("localStorage.setItem", "token", result.token);
-            await _js.InvokeVoidAsync("localStorage.setItem", "email", result.email);
-            await _js.InvokeVoidAsync("localStorage.setItem", "userId", result.id);
-            await _js.InvokeVoidAsync("localStorage.setItem", "role", result.role);
-
+            await SaveUserDataAsync(result);
             return true;
         }
 
         public async Task Logout()
         {
-            await _js.InvokeVoidAsync("localStorage.removeItem", "token");
-            await _js.InvokeVoidAsync("localStorage.removeItem", "email");
-            await _js.InvokeVoidAsync("localStorage.removeItem", "userId");
+            await _localStorage.RemoveItemAsync("token");
+            await _localStorage.RemoveItemAsync("email");
+            await _localStorage.RemoveItemAsync("userId");
+            await _localStorage.RemoveItemAsync("role");
+            _httpClient.DefaultRequestHeaders.Authorization = null;
         }
+
+        public async Task<UserDTO> GetCurrentUser()
+        {
+            await AddJwtHeaderAsync();
+            var response = await _httpClient.GetAsync("api/Account/Me");
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<UserDTO>();
+        }
+
+        public async Task<string> GetRoleAsync()
+        {
+            await AddJwtHeaderAsync();
+            return await _localStorage.GetItemAsync<string>("role");
+        }
+
     }
 }

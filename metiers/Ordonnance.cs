@@ -25,17 +25,11 @@ namespace metiers
 
         // --- Médecin qui crée l'ordonnance ---
         [Required]
-        public int MedecinID { get; set; }
-
-        [ForeignKey("MedecinID")]
-        public virtual User Medecin { get; set; }  // référence vers User où Role = Medecin
+        public Guid MedecinID { get; set; }
 
         // --- Pharmacien choisi ---
         [Required]
-        public int PharmacienID { get; set; }
-
-        [ForeignKey("PharmacienID")]
-        public virtual User Pharmacien { get; set; } // référence vers User où Role = Pharmacien
+        public Guid PharmacienID { get; set; }
 
         //Récupération des ordonnances :
         //Pour accéder au médecin : ordonnance.Medecin.Nom

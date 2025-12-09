@@ -1,0 +1,116 @@
+﻿@inject UserServices UserServices
+@inject NavigationManager Navigation
+
+<header class="w-full bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
+
+        <!-- LOGO -->
+        <img src="images/logo.png"
+             alt="ASM Logo"
+             class="h-14 w-auto" />
+
+        <!-- NAVIGATION -->
+        <nav class="flex items-center space-x-8 text-[15px] font-semibold">
+
+            <NavLink href="/dashboard"
+                     class="text-gray-600 hover:text-[#50bfa2] no-underline"
+                     activeClass="!text-[#50bfa2] no-underline">
+                Dashboard
+            </NavLink>
+
+            <NavLink href="/patients"
+                     class="text-gray-600 hover:text-[#50bfa2] no-underline"
+                     activeClass="!text-[#50bfa2] no-underline">
+                Patients
+            </NavLink>
+
+        </nav>
+
+        <!-- USER MENU -->
+        <div class="relative flex items-center space-x-2 cursor-pointer select-none"
+             @onclick="ToggleDropdown">
+
+            <!-- AVATAR -->
+            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center shadow-inner">
+                <i class="fas fa-user text-gray-600 text-lg"></i>
+            </div>
+
+            <!-- USERNAME -->
+            <span class="text-gray-600 font-medium text-[16px]">
+                @User?.Nom
+            </span>
+
+            <!-- ARROW -->
+            <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 011.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                      clip-rule="evenodd" />
+            </svg>
+
+            @if (ShowDropdown)
+            {
+                <div class="absolute right-0 top-[55px] w-72 bg-white border border-gray-200 rounded-lg shadow-lg">
+
+                    <!-- USER INFO -->
+                    <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                        <div class="flex items-center space-x-3">
+
+                            <!-- Avatar -->
+                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center shadow-inner border border-gray-300 -mt-3">
+                                <i class="fas fa-user text-gray-500 text-base"></i>
+                            </div>
+
+                            <!-- USER TEXT -->
+                            <div class="flex flex-col justify-center">
+                                <p class="font-medium text-gray-800 text-sm mb-0">
+                                    @User?.Nom @User?.Prenom
+                                </p>
+
+                                <p class="text-[13px] text-gray-500 whitespace-normal break-words">
+                                    @User?.Email
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- PROFILE -->
+                    <button @onclick="GoToProfile"
+                            class="flex items-center w-full px-4 py-3 text-gray-800 font-medium hover:bg-gray-50 transition text-[15px]">
+                        <i class="fas fa-user mr-2 text-gray-800"></i>
+                        Profile
+                    </button>
+
+                    <!-- LOGOUT -->
+                    <button @onclick="Logout"
+                            class="flex items-center w-full px-4 py-3 text-red-600 font-medium hover:bg-red-50 transition rounded-b-lg text-[15px]">
+                        <i class="fas fa-sign-out-alt mr-2 text-red-600"></i>
+                        Log out
+                    </button>
+                </div>
+            }
+
+        </div>
+
+    </div>
+</header>
+
+@code {
+    private bool ShowDropdown = false;
+    private UserDTO User;
+
+    protected override async Task OnInitializedAsync()
+    {
+        User = await UserServices.GetCurrentUser();
+    }
+
+    void ToggleDropdown() => ShowDropdown = !ShowDropdown;
+
+    void GoToProfile() => Navigation.NavigateTo("/profile");
+
+    async Task Logout()
+    {
+        await UserServices.Logout();
+        Navigation.NavigateTo("/Authentification/Inscription", true);
+    }
+}

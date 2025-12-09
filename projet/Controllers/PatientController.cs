@@ -7,7 +7,7 @@ namespace projet.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize("Medecin")] 
+   [Authorize] 
     public class PatientController : ControllerBase
     {
         private readonly IPatientRepository repository;
@@ -17,15 +17,16 @@ namespace projet.Controllers
             this.repository = repository;
         }
 
-   
-        [HttpGet("medecin/{medecinId}")]
-        public async Task<IActionResult> GetPatientsByMedecin(int medecinId)
+
+        [HttpGet("patients/medecin/{medecinId}")]
+        public async Task<IActionResult> GetPatientsByMedecin(Guid medecinId)
         {
             var patients = await repository.GetPatientsByMedecin(medecinId);
             return Ok(patients);
         }
 
-        [HttpGet("PatientID")]
+
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetPatientByID(int id)
         {
             return Ok(await repository.GetPatient(id));
@@ -33,7 +34,7 @@ namespace projet.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePatient(Patient patient,int medecinId)
+        public async Task<IActionResult> CreatePatient(Patient patient,Guid medecinId)
         {
             List<Patient> patients = await repository.GetPatientsByMedecin(medecinId);
             if (patients.Any(d => d.CIN.Equals(patient.CIN)))
@@ -44,21 +45,21 @@ namespace projet.Controllers
             return CreatedAtAction(nameof(GetPatientByID), new { id = newpatient.PatientID }, newpatient);
         }
 
-        [HttpPut("PatientID")]
-        public async Task<IActionResult> updatePatient(int id, Patient patient)
+        [HttpPut]
+        public async Task<IActionResult> updatePatient(Patient dep)
         {
-            var result = await repository.UpdatePatient(patient);
+            var result = await repository.UpdatePatient(dep);
             if (result) return NoContent();
             return BadRequest("erreur update");
         }
 
-        //[HttpDelete("id")]
-        //public async Task<IActionResult> deletePatient(int id)
-        //{
-        //    var result = await repository.DeletePatient(id);
-        //    if (result) return NoContent();
-        //    return NotFound("supp impoosible");
-        //}
+        [HttpDelete("id")]
+        public async Task<IActionResult> deletePatient(int id)
+        {
+            var result = await repository.DeletePatient(id);
+            if (result) return NoContent();
+            return NotFound("supp impoosible");
+        }
     }
 }
  

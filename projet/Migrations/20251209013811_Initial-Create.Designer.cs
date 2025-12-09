@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace projet.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20251209013811_Initial-Create")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,9 +463,9 @@ namespace projet.Migrations
             modelBuilder.Entity("metiers.Ordonnance", b =>
                 {
                     b.HasOne("metiers.Patient", "Patient")
-                        .WithMany()
+                        .WithMany("Ordonnances")
                         .HasForeignKey("PatientID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Patient");
@@ -476,6 +479,11 @@ namespace projet.Migrations
             modelBuilder.Entity("metiers.Ordonnance", b =>
                 {
                     b.Navigation("LigneMedicaments");
+                });
+
+            modelBuilder.Entity("metiers.Patient", b =>
+                {
+                    b.Navigation("Ordonnances");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,15 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>front</title>
     <base href="/" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Font Awesome Free -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- 🚀 Tailwind doit être ici -->
-
+    <!-- ✅ Tailwind CSS (output.css généré par npm run build:css ou watch:css) -->
     <link href="css/output.css" rel="stylesheet" />
 
-    <!-- Ton JS doit être ici aussi -->
-    <script src="js/theme.js"></script>
-
-    <link rel="preload" id="webassembly" />
+    <!-- Autres styles -->
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -22,6 +21,11 @@
     <link href="manifest.webmanifest" rel="manifest" />
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+
+    <!-- Ton JavaScript -->
+    <script src="js/theme.js"></script>
+
+    <!-- Important mais vide dans ton cas -->
     <script type="importmap"></script>
 </head>
 
@@ -40,8 +44,10 @@
         <span class="dismiss">🗙</span>
     </div>
 
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });
+    </script>
 </body>
 
 </html>

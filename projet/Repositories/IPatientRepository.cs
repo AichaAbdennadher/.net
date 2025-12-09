@@ -5,10 +5,10 @@ namespace projet.Repositories
     public interface IPatientRepository
     {
         Task<Patient> CreatePatient(Patient patient);
-        Task<List<Patient>> GetPatientsByMedecin(int medecinId);
+        Task<List<Patient>> GetPatientsByMedecin(Guid medecinId);
         Task<Patient> GetPatient(int id);
         Task<bool> UpdatePatient(Patient Patient);
-        //Task<bool> DeletePatient(int id); 
+        Task<bool> DeletePatient(int id);
 
     }
 }

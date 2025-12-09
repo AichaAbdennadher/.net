@@ -58,24 +58,38 @@ namespace projet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "medicaments",
                 columns: table => new
                 {
-                    UserID = table.Column<int>(type: "int", nullable: false)
+                    MedicamentID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nom = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Prenom = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Tel = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Adresse = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Specialite = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NomPharmacie = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    Nom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Stock = table.Column<int>(type: "int", nullable: false),
+                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.UserID);
+                    table.PrimaryKey("PK_medicaments", x => x.MedicamentID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "patients",
+                columns: table => new
+                {
+                    PatientID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CIN = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    Nom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Prenom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DateNaissance = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Tel = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Adresse = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    MedecinID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_patients", x => x.PatientID);
                 });
 
             migrationBuilder.CreateTable(
@@ -185,54 +199,6 @@ namespace projet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "medicaments",
-                columns: table => new
-                {
-                    MedicamentID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Stock = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_medicaments", x => x.MedicamentID);
-                    table.ForeignKey(
-                        name: "FK_medicaments_User_UserID",
-                        column: x => x.UserID,
-                        principalTable: "User",
-                        principalColumn: "UserID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "patients",
-                columns: table => new
-                {
-                    PatientID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CIN = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
-                    Nom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Prenom = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DateNaissance = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Tel = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Adresse = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    MedecinID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_patients", x => x.PatientID);
-                    table.ForeignKey(
-                        name: "FK_patients_User_UserID",
-                        column: x => x.UserID,
-                        principalTable: "User",
-                        principalColumn: "UserID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ordonnances",
                 columns: table => new
                 {
@@ -242,22 +208,12 @@ namespace projet.Migrations
                     envoyee = table.Column<bool>(type: "bit", nullable: false),
                     Statut = table.Column<int>(type: "int", nullable: false),
                     PatientID = table.Column<int>(type: "int", nullable: false),
-                    MedecinID = table.Column<int>(type: "int", nullable: false),
-                    PharmacienID = table.Column<int>(type: "int", nullable: false)
+                    MedecinID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PharmacienID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ordonnances", x => x.OrdID);
-                    table.ForeignKey(
-                        name: "FK_ordonnances_User_MedecinID",
-                        column: x => x.MedecinID,
-                        principalTable: "User",
-                        principalColumn: "UserID");
-                    table.ForeignKey(
-                        name: "FK_ordonnances_User_PharmacienID",
-                        column: x => x.PharmacienID,
-                        principalTable: "User",
-                        principalColumn: "UserID");
                     table.ForeignKey(
                         name: "FK_ordonnances_patients_PatientID",
                         column: x => x.PatientID,
@@ -345,29 +301,9 @@ namespace projet.Migrations
                 column: "ordID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_medicaments_UserID",
-                table: "medicaments",
-                column: "UserID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ordonnances_MedecinID",
-                table: "ordonnances",
-                column: "MedecinID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ordonnances_PatientID",
                 table: "ordonnances",
                 column: "PatientID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ordonnances_PharmacienID",
-                table: "ordonnances",
-                column: "PharmacienID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_patients_UserID",
-                table: "patients",
-                column: "UserID");
         }
 
         /// <inheritdoc />
@@ -405,9 +341,6 @@ namespace projet.Migrations
 
             migrationBuilder.DropTable(
                 name: "patients");
-
-            migrationBuilder.DropTable(
-                name: "User");
         }
     }
 }
