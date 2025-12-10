@@ -1,5 +1,132 @@
-﻿<h3>EditPatient</h3>
+﻿@page "/Patients/Edit/{id:int}"
+@using System.ComponentModel.DataAnnotations
+@using metiers
+@inject PatientServices PatientServices
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b p-4">
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Update Patient</h3>
+            <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
+        </div>
+
+        @if (IsLoading)
+        {
+            <div class="p-6 text-center text-gray-500">Loading...</div>
+        }
+        else
+        {
+            <!-- Form -->
+            <EditForm Model="Patient" OnValidSubmit="HandleUpdate" class="px-6 py-4 space-y-4">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-red-500" />
+
+                <!-- CIN -->
+                <div>
+                    <label class="block mb-1 text-sm font-normal text-gray-500">CIN</label>
+                    <InputText @bind-Value="Patient.CIN"
+                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label class="block mb-1 text-sm font-normal text-gray-500">Last Name</label>
+                    <InputText @bind-Value="Patient.Nom"
+                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                </div>
+
+                <!-- First Name -->
+                <div>
+                    <label class="block mb-1 text-sm font-normal text-gray-500">First Name</label>
+                    <InputText @bind-Value="Patient.Prenom"
+                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                </div>
+
+                <!-- Date of Birth -->
+                <div>
+                    <label class="block mb-1 text-sm font-normal text-gray-500">Date of Birth</label>
+                    <InputDate @bind-Value="Patient.DateNaissance"
+                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label class="block mb-1 text-sm font-normal text-gray-500">Phone</label>
+                    <InputText @bind-Value="Patient.Tel"
+                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <label class="block mb-1 text-sm font-normal text-gray-500">Address</label>
+                    <InputText @bind-Value="Patient.Adresse"
+                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end space-x-2 border-t pt-4">
+                    <button type="button" @onclick="Cancel"
+                            class="bg-gray-300 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-normal text-[#6f7885]">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-5 py-2.5 rounded-lg text-sm font-medium">
+                        Update
+                    </button>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
 
 @code {
+    [Parameter] public int id { get; set; }
 
+    private Patient Patient { get; set; } = new Patient();
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Charger le patient existant
+        var existing = await PatientServices.GetPatientAsync(id);
+
+        if (existing != null)
+        {
+            Patient = existing;
+        }
+
+        // Récuperer MedecinID depuis localStorage
+        string medId = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+        medId = medId?.Trim('"', '{', '}', ' ');
+
+        if (Guid.TryParse(medId, out Guid guid))
+        {
+            Patient.MedecinID = guid;
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task HandleUpdate()
+    {
+        var result = await PatientServices.UpdatePatient(Patient);
+
+        if (result)
+            Navigation.NavigateTo("/Patients/ListPatients");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/Patients/ListPatients");
+    }
 }
+

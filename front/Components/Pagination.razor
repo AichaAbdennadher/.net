@@ -1,0 +1,43 @@
+﻿@code {
+    private int currentPage = 1;
+    private int totalPages = 6; // exemple, à adapter selon tes données
+
+    private void GoToPage(int page)
+    {
+        if (page < 1 || page > totalPages)
+            return;
+
+        currentPage = page;
+        // Ici, tu peux ajouter du code pour charger les données de la page
+    }
+}
+
+<nav class="flex justify-end p-4" aria-label="Table navigation">
+    <ul class="inline-flex items-center space-x-2">
+        <li>
+            <button
+                @onclick="() => GoToPage(currentPage - 1)"
+                disabled="@(currentPage == 1)"
+                class="w-8 h-8 border rounded text-gray-500 bg-white hover:bg-gray-100 disabled:opacity-50"
+            >
+                ‹
+            </button>
+        </li>
+
+        <li>
+            <span class="px-4 py-2 text-sm font-medium bg-gray-100 border border-gray-300 rounded">
+                @currentPage
+            </span>
+        </li>
+
+        <li>
+            <button
+                @onclick="() => GoToPage(currentPage + 1)"
+                disabled="@(currentPage == totalPages)"
+                class="w-8 h-8 border rounded text-gray-500 bg-white hover:bg-gray-100 disabled:opacity-50"
+            >
+                ›
+            </button>
+        </li>
+    </ul>
+</nav>

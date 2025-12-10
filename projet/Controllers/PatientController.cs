@@ -53,7 +53,7 @@ namespace projet.Controllers
             return BadRequest("erreur update");
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> deletePatient(int id)
         {
             var result = await repository.DeletePatient(id);

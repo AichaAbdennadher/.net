@@ -60,5 +60,12 @@ namespace front.Services
             var response = await _httpClient.DeleteAsync($"api/Patient/{id}");
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<Patient> GetPatientAsync(int id)
+        {
+            return await _httpClient.
+                GetFromJsonAsync<Patient>($"api/Patient/{id}");
+        }
+
     }
 }
