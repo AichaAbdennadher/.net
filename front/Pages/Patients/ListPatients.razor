@@ -13,11 +13,12 @@
             <!-- Header -->
             <div class="flex flex-col md:flex-row items-center justify-between p-4 bg-white gap-4">
 
-                <!-- Search -->
+                <!-- Search selon /nom/prenom/adress-->
                 <div class="w-full md:w-1/2 relative">
                     <input type="text" @bind="SearchText"
                            placeholder="Search"
-                           class="w-full bg-white border border-gray-300 text-gray-700 text-sm rounded-xl pl-11 py-2.5 shadow-sm" />
+                           class="w-full bg-white border border-gray-300 text-gray-700 text-sm rounded-xl pl-11 py-2.5 shadow-sm"
+                           @oninput="OnSearchChanged" />
 
                     <span class="absolute inset-y-0 left-3 flex items-center text-gray-500">
                         <i class="fas fa-search text-[15px]"></i>
@@ -31,7 +32,7 @@
                     <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                     </svg>
-                    Add Patient
+                    Add patient
                 </button>
             </div>
 
@@ -51,7 +52,7 @@
                     </thead>
 
                     <tbody>
-                        @foreach (var patient in FilteredPatients)
+                        @foreach (var patient in PagedPatients)
                         {
                             <tr class="border-b">
                                 <td class="px-4 py-3">@patient.PatientID</td>
@@ -62,14 +63,11 @@
                                 <td class="px-4 py-3">@patient.Adresse</td>
 
                                 <td class="px-4 py-3 flex space-x-2">
-
-                                    <!-- Edit -->
                                     <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
                                           @onclick="() => Edit(patient.PatientID)">
                                         <i class='bx bx-edit text-gray-500 text-2xl'></i>
                                     </span>
 
-                                    <!-- Delete --> 
                                     <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
                                           @onclick="() => Delete(patient.PatientID)">
                                         <i class='bx bxs-trash text-[#50bfa2] text-2xl'></i>
@@ -80,6 +78,7 @@
                     </tbody>
                 </table>
             </div>
+            <Pagination TotalPages="@totalPages" CurrentPage="@currentPage" OnPageChange="LoadPatients" />
 
         </div>
     </div>
@@ -89,6 +88,10 @@
     private List<Patient> Patients = new();
     private string SearchText = "";
 
+    private int currentPage = 1;
+    private int pageSize = 5; // nombre d'éléments par page
+    private int totalPages => (int)Math.Ceiling((double)FilteredPatients.Count() / pageSize);
+
     private IEnumerable<Patient> FilteredPatients =>
         string.IsNullOrWhiteSpace(SearchText)
             ? Patients
@@ -97,21 +100,31 @@
                 p.Prenom.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                 p.Adresse.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
 
+    private IEnumerable<Patient> PagedPatients =>
+        FilteredPatients.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadPatients();
+        await LoadPatients(currentPage);
     }
 
-    private async Task LoadPatients()
+    private async Task LoadPatients(int page)
     {
+        currentPage = page;
+
         string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
         medecinIdString = medecinIdString?.Trim('"');
 
         Patients = await PatientServices.GetPatients(medecinIdString);
+        StateHasChanged();
+    }
+
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        currentPage = 1; // reset page à 1 après modification du filtre
     }
 
     private void Edit(int id) => Navigation.NavigateTo($"/Patients/Edit/{id}");
     private void Delete(int id) => Navigation.NavigateTo($"/Patients/Delete/{id}");
-
     private void CreerPatient() => Navigation.NavigateTo("/Patients/Create");
 }

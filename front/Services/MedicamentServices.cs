@@ -1,17 +1,16 @@
 ﻿using Blazored.LocalStorage;
 using metiers;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace front.Services
 {
-    public class PatientServices
+    public class MedicamentServices
     {
         private readonly HttpClient _httpClient;
         private readonly ILocalStorageService _localStorage;
 
-        public PatientServices(HttpClient httpClient, ILocalStorageService localStorage)
+        public MedicamentServices(HttpClient httpClient, ILocalStorageService localStorage)
         {
             _httpClient = httpClient;
             _localStorage = localStorage;
@@ -27,44 +26,46 @@ namespace front.Services
                 _httpClient.DefaultRequestHeaders.Authorization = null;
         }
 
-        public async Task<List<Patient>> GetPatients(string medecinId)
+        public async Task<List<Medicament>> GetMedicaments(string userId)
         {
             await AddJwtHeaderAsync();
-            return await _httpClient.GetFromJsonAsync<List<Patient>>($"api/Patient/patients/medecin/{medecinId}");
+            return await _httpClient.GetFromJsonAsync<List<Medicament>>($"api/Medicament/Medicaments/ph/{userId}");
         }
 
-        public async Task<Patient> GetPatient(int id)
+        public async Task<Medicament> GetMedicament(int id)
         {
             await AddJwtHeaderAsync();
-            return await _httpClient.GetFromJsonAsync<Patient>($"api/Patient/{id}");
+            return await _httpClient.GetFromJsonAsync<Medicament>($"api/Medicament/{id}");
         }
 
-        public async Task<Patient> CreatePatient(Patient patient)
+        public async Task<Medicament> CreateMedicament(Medicament Medicament)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.PostAsJsonAsync("api/Patient", patient);
+            var response = await _httpClient.PostAsJsonAsync("api/Medicament", Medicament);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<Patient>();
+            return await response.Content.ReadFromJsonAsync<Medicament>();
         }
 
-        public async Task<bool> UpdatePatient(Patient patient)
+        public async Task<bool> UpdateMedicament(Medicament Medicament)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.PutAsJsonAsync("api/Patient", patient);
+            var response = await _httpClient.PutAsJsonAsync("api/Medicament", Medicament);
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> DeletePatient(int id)
+        public async Task<bool> DeleteMedicament(int id)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.DeleteAsync($"api/Patient/{id}");
+            var response = await _httpClient.DeleteAsync($"api/Medicament/{id}");
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<Patient> GetPatientAsync(int id)
+        public async Task<Medicament> GetMedicamentAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<Patient>($"api/Patient/{id}");
+            return await _httpClient.
+                GetFromJsonAsync<Medicament>($"api/Medicament/{id}");
         }
 
     }
 }
+

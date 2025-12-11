@@ -7,7 +7,7 @@ namespace projet.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize("Pharmacien")]
+    [Authorize]
     public class MedicamentController : ControllerBase
     {
         private readonly IMedicamentRepository repository;
@@ -17,10 +17,10 @@ namespace projet.Controllers
             this.repository = repository;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetMedicaments(Guid id)
+        [HttpGet("Medicaments/ph/{userId}")]
+        public async Task<IActionResult> GetMedicaments(Guid userId)
         {
-            var Medicaments = await repository.GetMedicamentsPharmacien(id);
+            var Medicaments = await repository.GetMedicamentsPharmacien(userId);
             return Ok(Medicaments);
         }
 
@@ -36,28 +36,28 @@ namespace projet.Controllers
             return CreatedAtAction(nameof(GetMedicamentByID), new { id = newMedicament.MedicamentID}, newMedicament);
         }
 
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> updateMedicament(int id, Medicament Medicament)
+        [HttpPut]
+        public async Task<IActionResult> updateMedicament(Medicament Medicament)
         {
             var result = await repository.UpdateMedicament(Medicament);
             if (result) return NoContent();
             return BadRequest("erreur update");
         }
 
-        [HttpGet("MedicamentID")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetMedicamentByID(int id)
         {
             return Ok(await repository.GetMedicament(id));
 
         }
 
-        //[HttpDelete("OrdID")]
-        //public async Task<IActionResult> deleteMedicament(int id)
-        //{
-        //    var result = await repository.DeleteMedicament(id);
-        //    if (result) return NoContent();
-        //    return NotFound("supp impoosible");
-        //}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> deleteMedicament(int id)
+        {
+            var result = await repository.DeleteMedicament(id);
+            if (result) return NoContent();
+            return NotFound("supp impoosible");
+        }
 
 
     }

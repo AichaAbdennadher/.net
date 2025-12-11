@@ -47,6 +47,16 @@ namespace projet.Repositories
         {
             return await context.medicaments.FindAsync(id);
         }
+
+        public async Task<bool> DeleteMedicament(int id)
+        {
+            var dep = await context.medicaments.FindAsync(id);
+            if (dep == null)
+                return false;
+            context.medicaments.Remove(dep);
+            await context.SaveChangesAsync();
+            return true;
+        }
     }
 }
 

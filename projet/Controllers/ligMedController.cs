@@ -23,14 +23,14 @@ namespace projet.Controllers
             return Ok(ligMeds);
         }
 
-        [HttpGet("ligneID")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetlMedByID(int id)
         {
             return Ok(await repository.GetligneMedicament(id));
 
         }
 
-        [HttpPut("delivrer/{ligneID}")]
+        [HttpPut("delivrer/{ligneId}")]
         public async Task<IActionResult> DelivrerLigneMedicament(int ligneId)
         {
             var result = await repository.DelivrerLigneMedicament(ligneId);

@@ -1,9 +1,127 @@
-﻿@page "/Medicamants/ListMedicaments"
+﻿@page "/Medicaments/ListMedicaments"
+@using metiers
+@inject NavigationManager Navigation
+@inject MedicamentServices MedicamentServices
+@inject IJSRuntime JS
 
+<HeaderPh />
 
+<section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5">
+    <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
+        <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
 
-<h3>ListMedicamentsrazor</h3>
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row items-center justify-between p-4 bg-white gap-4">
+
+                <!-- Search -->
+                <div class="w-full md:w-1/2 relative">
+                    <input type="text" @bind="SearchText"
+                           placeholder="Search"
+                           class="w-full bg-white border border-gray-300 text-gray-700 text-sm rounded-xl pl-11 py-2.5 shadow-sm"
+                           @oninput="OnSearchChanged" />
+
+                    <span class="absolute inset-y-0 left-3 flex items-center text-gray-500">
+                        <i class="fas fa-search text-[15px]"></i>
+                    </span>
+                </div>
+
+                <!-- Add  -->
+                <button class="flex items-center text-white font-medium rounded-lg text-base px-4 py-2 bg-[#50bfa2] hover:bg-[#95dbc8]"
+                        @onclick="CreerMedicament">
+
+                    <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Add medicine
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3">Number</th>
+                            <th class="px-4 py-3">Name</th>
+                            <th class="px-4 py-3">Description</th>
+                            <th class="px-4 py-3">Stock</th>
+                           
+                            <th class="px-4 py-3" colspan="2">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var Medicament in PagedMedicaments)
+                        {
+                            <tr class="border-b">
+                                <td class="px-4 py-3">@Medicament.MedicamentID</td>
+                                <td class="px-4 py-3">@Medicament.Nom</td>
+                                <td class="px-4 py-3">@Medicament.Description</td>
+                                <td class="px-4 py-3">@Medicament.Stock</td>
+                               
+
+                                <td class="px-4 py-3 flex space-x-2">
+                                    <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
+                                          @onclick="() => Edit(Medicament.MedicamentID)">
+                                        <i class='bx bx-edit text-gray-500 text-2xl'></i>
+                                    </span>
+
+                                    <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
+                                          @onclick="() => Delete(Medicament.MedicamentID)">
+                                        <i class='bx bxs-trash text-[#50bfa2] text-2xl'></i>
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <Pagination TotalPages="@totalPages" CurrentPage="@currentPage" OnPageChange="LoadMedicaments" />
+
+        </div>
+    </div>
+</section>
 
 @code {
+    private List<Medicament> Medicaments = new();
+    private string SearchText = "";
 
+    private int currentPage = 1;
+    private int pageSize = 5; // nombre d'éléments par page
+    private int totalPages => (int)Math.Ceiling((double)FilteredMedicaments.Count() / pageSize);
+
+    private IEnumerable<Medicament> FilteredMedicaments =>
+        string.IsNullOrWhiteSpace(SearchText)
+            ? Medicaments
+            : Medicaments.Where(p =>
+                p.Nom.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Medicament> PagedMedicaments =>
+        FilteredMedicaments.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMedicaments(currentPage);
+    }
+
+    private async Task LoadMedicaments(int page)
+    {
+        currentPage = page;
+
+        string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+        medecinIdString = medecinIdString?.Trim('"');
+
+        Medicaments = await MedicamentServices.GetMedicaments(medecinIdString);
+        StateHasChanged();
+    }
+
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        currentPage = 1; // reset page à 1 après modification du filtre
+    }
+
+    private void Edit(int id) => Navigation.NavigateTo($"/Medicaments/Edit/{id}");
+    private void Delete(int id) => Navigation.NavigateTo($"/Medicaments/Delete/{id}");
+    private void CreerMedicament() => Navigation.NavigateTo("/Medicaments/Create");
 }
+

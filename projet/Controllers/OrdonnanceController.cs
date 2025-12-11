@@ -25,7 +25,7 @@ namespace projet.Controllers
             return Ok(Ordonnances);
         }
 
-        [HttpGet("OrdID")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetOrdonnanceByID(int id)
         {
             return Ok(await repository.GetOrdonnance(id));
@@ -44,23 +44,23 @@ namespace projet.Controllers
             return CreatedAtAction(nameof(GetOrdonnanceByID), new { id = newOrdonnance.OrdID }, newOrdonnance);
         }
 
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> updateOrdonnance(int id, Ordonnance Ordonnance)
+        [HttpPut("update")]
+        public async Task<IActionResult> updateOrdonnance( Ordonnance Ordonnance)
         {
             var result = await repository.UpdateOrdonnance(Ordonnance);
             if (result) return NoContent();
             return BadRequest("erreur update");
         }
 
-        [HttpPut("envoyer/{id}")]
-        public async Task<IActionResult> EnvoyerOrdonnance(int id, Ordonnance Ordonnance)
+        [HttpPut("envoyer")]
+        public async Task<IActionResult> EnvoyerOrdonnance(Ordonnance Ordonnance)
         {
             var result = await repository.EnvoyerOrdonnance(Ordonnance);
             if (result) return NoContent();
             return BadRequest("erreur update");
         }
 
-        [HttpDelete("OrdID")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> deleteOrdonnance(int id)
         {
             var result = await repository.DeleteOrdonnance(id);

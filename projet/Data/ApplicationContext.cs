@@ -24,12 +24,8 @@ public class ApplicationContext : IdentityDbContext<projet.Data.ApplicationUser>
             .HasForeignKey(l => l.ordID)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // LigneMedicament → Medicament : NO ACTION
-        modelBuilder.Entity<LigneMedicament>()
-            .HasOne(l => l.Medicament)
-            .WithMany(m => m.LigneMedicaments)
-            .HasForeignKey(l => l.MedicamentID)
-            .OnDelete(DeleteBehavior.NoAction);
+        
+        
     }
 
 }

@@ -1,0 +1,81 @@
+﻿@page "/Medicaments/Create"
+@using metiers
+@inject MedicamentServices MedicamentServices
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b p-4">
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Create new medicine</h3>
+            <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
+        </div>
+
+        <EditForm Model="medicament" OnValidSubmit="HandleSubmit" class="px-6 py-4 space-y-4">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-red-500" />
+
+             <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">Name</label>
+                <InputText @bind-Value="medicament.Nom" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+            </div>
+
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">Description</label>
+                <InputText @bind-Value="medicament.Description" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+            </div>
+
+            <div>
+                <label class="block mb-1 text-sm font-normal text-gray-500">Stock</label>
+                <InputNumber @bind-Value="medicament.Stock" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button type="button" @onclick="Cancel" class="bg-gray-300 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-normal text-[#6f7885]">Cancel</button>
+                <button type="submit" class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-5 py-2.5 rounded-lg text-sm font-medium">Save</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Medicament medicament { get; set; } = new Medicament();
+    protected override async Task OnInitializedAsync()
+    {
+        string medId = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+
+        // Nettoyage des caractères parasites
+        medId = medId?.Trim('"', '{', '}', ' ');
+
+        Console.WriteLine($"🟡 medId reçu depuis localStorage = {medId}");
+
+        if (Guid.TryParse(medId, out Guid guid))
+        {
+            medicament.UserID = guid;
+            Console.WriteLine($"🟢 MedecinID assigné = {medicament.UserID}");
+        }
+        else
+        {
+            Console.WriteLine("❌ ERREUR : La valeur userId n'est pas un GUID valide !");
+        }
+    }
+
+
+    private async Task HandleSubmit()
+    {
+        var result = await MedicamentServices.CreateMedicament(medicament);
+        if (result != null)
+            Navigation.NavigateTo("/Medicaments/ListMedicaments");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/Medicaments/ListMedicaments");
+    }
+}

@@ -1,5 +1,4 @@
 ﻿@page "/Patients/Create"
-@using System.ComponentModel.DataAnnotations
 @using metiers
 @inject PatientServices PatientServices
 @inject NavigationManager Navigation
@@ -9,7 +8,7 @@
     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between border-b p-4">
-            <h3 class="text-lg font-semibold text-[#50bfa2]">Create New Patient</h3>
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Create new patient</h3>
             <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />

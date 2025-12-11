@@ -1,6 +1,6 @@
-﻿@page "/Patients/Edit/{id:int}"
+﻿@page "/Medicaments/Edit/{id:int}"
 @using metiers
-@inject PatientServices PatientServices
+@inject MedicamentServices MedicamentServices
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
@@ -8,7 +8,7 @@
     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between border-b p-4">
-            <h3 class="text-lg font-semibold text-[#50bfa2]">Update Patient</h3>
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Update medicine</h3>
             <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -24,49 +24,26 @@
         else
         {
             <!-- Form -->
-            <EditForm Model="Patient" OnValidSubmit="HandleUpdate" class="px-6 py-4 space-y-4">
+            <EditForm Model="medicament" OnValidSubmit="HandleUpdate" class="px-6 py-4 space-y-4">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-red-500" />
 
-                <!-- CIN -->
+        
                 <div>
-                    <label class="block mb-1 text-sm font-normal text-gray-500">CIN</label>
-                    <InputText @bind-Value="Patient.CIN"
+                    <label class="block mb-1 text-sm font-normal text-gray-500"> Name</label>
+                    <InputText @bind-Value="medicament.Nom"
                                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
                 </div>
 
-                <!-- Last Name -->
                 <div>
-                    <label class="block mb-1 text-sm font-normal text-gray-500">Last Name</label>
-                    <InputText @bind-Value="Patient.Nom"
+                    <label class="block mb-1 text-sm font-normal text-gray-500">Description</label>
+                    <InputText @bind-Value="medicament.Description"
                                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
                 </div>
 
-                <!-- First Name -->
-                <div>
-                    <label class="block mb-1 text-sm font-normal text-gray-500">First Name</label>
-                    <InputText @bind-Value="Patient.Prenom"
-                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
-                </div>
-
-                <!-- Date of Birth -->
-                <div>
-                    <label class="block mb-1 text-sm font-normal text-gray-500">Date of Birth</label>
-                    <InputDate @bind-Value="Patient.DateNaissance"
-                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
-                </div>
-
-                <!-- Phone -->
-                <div>
-                    <label class="block mb-1 text-sm font-normal text-gray-500">Phone</label>
-                    <InputText @bind-Value="Patient.Tel"
-                               class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
-                </div>
-
-                <!-- Address -->
-                <div>
-                    <label class="block mb-1 text-sm font-normal text-gray-500">Address</label>
-                    <InputText @bind-Value="Patient.Adresse"
+                            <div>
+                    <label class="block mb-1 text-sm font-normal text-gray-500">Stock</label>
+                    <InputNumber @bind-Value="medicament.Stock"
                                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
                 </div>
 
@@ -90,17 +67,17 @@
 @code {
     [Parameter] public int id { get; set; }
 
-    private Patient Patient { get; set; } = new Patient();
+    private Medicament medicament { get; set; } = new Medicament();
     private bool IsLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        // Charger le patient existant
-        var existing = await PatientServices.GetPatientAsync(id);
+        // Charger le Medicament existant
+        var existing = await MedicamentServices.GetMedicamentAsync(id);
 
         if (existing != null)
         {
-            Patient = existing;
+            medicament = existing;
         }
 
         // Récuperer MedecinID depuis localStorage
@@ -109,7 +86,7 @@
 
         if (Guid.TryParse(medId, out Guid guid))
         {
-            Patient.MedecinID = guid;
+            medicament.UserID = guid;
         }
 
         IsLoading = false;
@@ -117,15 +94,15 @@
 
     private async Task HandleUpdate()
     {
-        var result = await PatientServices.UpdatePatient(Patient);
+        var result = await MedicamentServices.UpdateMedicament(medicament);
 
         if (result)
-            Navigation.NavigateTo("/Patients/ListPatients");
+            Navigation.NavigateTo("/Medicaments/ListMedicaments");
     }
 
     private void Cancel()
     {
-        Navigation.NavigateTo("/Patients/ListPatients");
+        Navigation.NavigateTo("/Medicaments/ListMedicaments");
     }
 }
 

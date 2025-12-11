@@ -1,43 +1,42 @@
-﻿@code {
-    private int currentPage = 1;
-    private int totalPages = 6; // exemple, à adapter selon tes données
+﻿<div class="flex justify-end p-2 space-x-1" aria-label="Table navigation">
+    <!-- Bouton précédent -->
+    <button @onclick="PrevPage" disabled="@(CurrentPage == 1)"
+            class="px-3 py-1 rounded-l-md border border-gray-300 bg-white text-gray-600 hover:bg-[#daf2ef] hover:text-white transition-colors disabled:opacity-50">
+        ‹
+    </button>
 
-    private void GoToPage(int page)
+    <!-- Page actuelle -->
+    <span class="px-4 py-1 border-t border-b border-gray-300 bg-[#daf2ef] text-gray-700 font-semibold">
+        @CurrentPage
+    </span>
+
+    <!-- Bouton suivant -->
+    <button @onclick="NextPage" disabled="@(CurrentPage == TotalPages)"
+            class="px-3 py-1 rounded-r-md border border-gray-300 bg-white text-gray-600 hover:bg-[#daf2ef] hover:text-white transition-colors disabled:opacity-50">
+        ›
+    </button>
+</div>
+
+@code {
+    [Parameter] public int TotalPages { get; set; } = 1;
+    [Parameter] public int CurrentPage { get; set; } = 1;
+    [Parameter] public EventCallback<int> OnPageChange { get; set; }
+
+    private async Task PrevPage()
     {
-        if (page < 1 || page > totalPages)
-            return;
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await OnPageChange.InvokeAsync(CurrentPage);
+        }
+    }
 
-        currentPage = page;
-        // Ici, tu peux ajouter du code pour charger les données de la page
+    private async Task NextPage()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+            await OnPageChange.InvokeAsync(CurrentPage);
+        }
     }
 }
-
-<nav class="flex justify-end p-4" aria-label="Table navigation">
-    <ul class="inline-flex items-center space-x-2">
-        <li>
-            <button
-                @onclick="() => GoToPage(currentPage - 1)"
-                disabled="@(currentPage == 1)"
-                class="w-8 h-8 border rounded text-gray-500 bg-white hover:bg-gray-100 disabled:opacity-50"
-            >
-                ‹
-            </button>
-        </li>
-
-        <li>
-            <span class="px-4 py-2 text-sm font-medium bg-gray-100 border border-gray-300 rounded">
-                @currentPage
-            </span>
-        </li>
-
-        <li>
-            <button
-                @onclick="() => GoToPage(currentPage + 1)"
-                disabled="@(currentPage == totalPages)"
-                class="w-8 h-8 border rounded text-gray-500 bg-white hover:bg-gray-100 disabled:opacity-50"
-            >
-                ›
-            </button>
-        </li>
-    </ul>
-</nav>
