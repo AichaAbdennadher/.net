@@ -1,0 +1,205 @@
+﻿@page "/Ordonnances/Create"
+@using metiers
+@inject PatientServices PatientServices
+@inject UserServices UserServices
+@inject OrdonnanceServices OrdonnanceServices
+@inject LigneMedicamentServices LigneMedicamentServices
+@inject TempOrdonnanceService TempOrdonnanceService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="relative">
+    <!-- Formulaire Ordonnance -->
+    <EditForm Model="Ordonnance" OnValidSubmit="HandleSubmit" class="space-y-4">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-red-500" />
+
+        <!-- Patient -->
+        <div class="relative">
+            <InputText @bind-Value="searchPatient" @oninput="FilterPatients" placeholder="Rechercher un patient"
+                       class="w-full p-2 border rounded" />
+            @if (filteredPatients.Any() && !string.IsNullOrWhiteSpace(searchPatient))
+            {
+                <ul class="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
+                    @foreach (var p in filteredPatients)
+                    {
+                        <li class="p-2 hover:bg-[#50bfa2] hover:text-white cursor-pointer" @onclick="() => SelectPatient(p)">
+                            @($"{p.CIN} {p.Nom} {p.Prenom}")
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <!-- Pharmacie -->
+        <div class="relative">
+            <InputText @bind-Value="searchPharmacie" @oninput="FilterPharmacies" placeholder="Rechercher une pharmacie"
+                       class="w-full p-2 border rounded" />
+            @if (filteredPharmacies.Any() && !string.IsNullOrWhiteSpace(searchPharmacie))
+            {
+                <ul class="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
+                    @foreach (var ph in filteredPharmacies)
+                    {
+                        <li class="p-2 hover:bg-[#50bfa2] hover:text-white cursor-pointer" @onclick="() => SelectPharmacie(ph)">
+                            @ph.NomPharmacie
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <!-- Bouton ajouter une ligne -->
+        <button type="button" class="bg-[#50bfa2] text-white px-4 py-2 rounded" @onclick="ShowModal">
+            Ajouter un médicament
+        </button>
+
+        <!-- Tableau des lignes -->
+        <div class="overflow-x-auto mt-2">
+            <table class="w-full text-sm text-left border">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2">Nom</th>
+                        <th class="px-4 py-2">Dosage</th>
+                        <th class="px-4 py-2">Quantité</th>
+                        <th class="px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ligne in TempOrdonnanceService.GetLignes())
+                    {
+                        <tr class="border-t">
+                            <td class="px-4 py-2">@ligne.Medicament?.Nom</td>
+                            <td class="px-4 py-2">@ligne.dose</td>
+                            <td class="px-4 py-2">@ligne.qtePrescrite</td>
+                            <td class="px-4 py-2">
+                                <button class="text-red-500" @onclick="() => RemoveLigne(ligne)">Supprimer</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="bg-[#50bfa2] text-white px-4 py-2 rounded mt-4">
+            Enregistrer Ordonnance
+        </button>
+    </EditForm>
+
+    <!-- Modal LignesMedicamentsCreate -->
+    @if (showModal)
+    {
+        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <LignesMedicamentsCreate ParentOrdonnance="Ordonnance"
+                                     OnLigneAdded="OnLigneAdded"
+                                     OnClose="CloseModal" />
+        </div>
+    }
+</div>
+
+@code {
+    private Ordonnance Ordonnance { get; set; } = new() { DateCreation = DateTime.Today };
+    private List<Patient> Patients = new();
+    private List<Patient> filteredPatients = new();
+    private string searchPatient = "";
+
+    private List<UserDTO> Pharmacies = new();
+    private List<UserDTO> filteredPharmacies = new();
+    private string searchPharmacie = "";
+
+    private bool showModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string userId = (await JS.InvokeAsync<string>("localStorage.getItem", "userId"))?.Trim('"');
+        if (!Guid.TryParse(userId, out Guid medId))
+        {
+            await JS.InvokeVoidAsync("showNotification", "ID médecin invalide !", "error");
+            return;
+        }
+
+        Ordonnance.MedecinID = medId;
+
+        Patients = await PatientServices.GetPatients(userId);
+        filteredPatients = Patients.ToList();
+
+        Pharmacies = await UserServices.GetPharmacies();
+        filteredPharmacies = Pharmacies.ToList();
+    }
+
+    private void FilterPatients(ChangeEventArgs e)
+    {
+        searchPatient = e.Value?.ToString() ?? "";
+        filteredPatients = string.IsNullOrWhiteSpace(searchPatient) ? new() :
+            Patients.FindAll(p => $"{p.CIN} {p.Nom} {p.Prenom}".Contains(searchPatient, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void FilterPharmacies(ChangeEventArgs e)
+    {
+        searchPharmacie = e.Value?.ToString() ?? "";
+        filteredPharmacies = string.IsNullOrWhiteSpace(searchPharmacie) ? new() :
+            Pharmacies.FindAll(p => !string.IsNullOrEmpty(p.NomPharmacie) && p.NomPharmacie.Contains(searchPharmacie, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task SelectPharmacie(UserDTO ph)
+    {
+        Ordonnance.PharmacienID = ph.Id;
+        TempOrdonnanceService.TempPharmacieID = ph.Id;
+        searchPharmacie = ph.NomPharmacie;
+        filteredPharmacies.Clear();
+        StateHasChanged();
+    }
+
+    private void SelectPatient(Patient p)
+    {
+        Ordonnance.PatientID = p.PatientID;
+        searchPatient = $"{p.CIN} {p.Nom} {p.Prenom}";
+        filteredPatients.Clear();
+    }
+
+    private void RemoveLigne(LigneMedicament ligne)
+    {
+        TempOrdonnanceService.RemoveLigne(ligne);
+    }
+
+    private void OnLigneAdded(LigneMedicament ligne)
+    {
+        StateHasChanged();
+    }
+
+    private async Task ShowModal()
+    {
+        showModal = true;
+        await JS.InvokeVoidAsync("document.body.style.setProperty", "overflow", "hidden");
+    }
+
+    private async Task CloseModal()
+    {
+        showModal = false;
+        await JS.InvokeVoidAsync("document.body.style.removeProperty", "overflow");
+        StateHasChanged();
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (!TempOrdonnanceService.GetLignes().Any())
+        {
+            await JS.InvokeVoidAsync("alert", "Ajouter au moins une ligne !");
+            return;
+        }
+
+        if (Ordonnance.OrdID == 0)
+        {
+            var result = await OrdonnanceServices.CreateOrdonnance(Ordonnance);
+            Ordonnance.OrdID = result.OrdID;
+        }
+
+        foreach (var ligne in TempOrdonnanceService.GetLignes())
+        {
+            ligne.ordID = Ordonnance.OrdID;
+            await LigneMedicamentServices.CreateLigneMedicament(ligne);
+        }
+
+        TempOrdonnanceService.Clear();
+        Navigation.NavigateTo("/Ordonnances/ListOrdonnances");
+    }
+}

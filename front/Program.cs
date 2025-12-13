@@ -16,10 +16,15 @@ namespace front
             builder.Services.AddMudServices();
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5050") }); //url de backend
-            builder.Services.AddBlazoredLocalStorage(); // <- ajout ici
+            builder.Services.AddBlazoredLocalStorage(); // ajouter
+
             builder.Services.AddScoped<PatientServices>(); ////ajouter 
             builder.Services.AddScoped<UserServices>();
             builder.Services.AddScoped<MedicamentServices>();
+            builder.Services.AddScoped<OrdonnanceServices>();
+            builder.Services.AddScoped<LigneMedicamentServices>();
+            builder.Services.AddScoped<TempOrdonnanceService>();
+            builder.Services.AddScoped<TempLignesService>();
 
             await builder.Build().RunAsync();
         }

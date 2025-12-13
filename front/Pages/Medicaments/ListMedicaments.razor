@@ -13,7 +13,7 @@
             <!-- Header -->
             <div class="flex flex-col md:flex-row items-center justify-between p-4 bg-white gap-4">
 
-                <!-- Search -->
+                <!-- Search par nom -->
                 <div class="w-full md:w-1/2 relative">
                     <input type="text" @bind="SearchText"
                            placeholder="Search"
@@ -104,16 +104,27 @@
         await LoadMedicaments(currentPage);
     }
 
-    private async Task LoadMedicaments(int page)
+  private async Task LoadMedicaments(int page)
+{
+    currentPage = page;
+
+    // Récupérer l'ID depuis le localStorage
+    string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+    medecinIdString = medecinIdString?.Trim('"');
+
+    // Convertir en Guid
+    if (!Guid.TryParse(medecinIdString, out Guid medecinId))
     {
-        currentPage = page;
-
-        string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
-        medecinIdString = medecinIdString?.Trim('"');
-
-        Medicaments = await MedicamentServices.GetMedicaments(medecinIdString);
-        StateHasChanged();
+        // Gestion d'erreur si le guid n'est pas valide
+        await JS.InvokeVoidAsync("showNotification", "ID médecin invalide !", "error");
+        return;
     }
+
+    // Passer le Guid au service
+    Medicaments = await MedicamentServices.GetMedicaments(medecinId);
+
+    StateHasChanged();
+}
 
     private void OnSearchChanged(ChangeEventArgs e)
     {

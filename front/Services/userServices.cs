@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.JSInterop;
 using metiers.shared;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.JSInterop;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -84,6 +85,16 @@ namespace front.Services
             await AddJwtHeaderAsync();
             return await _localStorage.GetItemAsync<string>("role");
         }
+        public async Task<List<UserDTO>> GetPharmacies()
+        {
+            await AddJwtHeaderAsync();
+
+            return await _httpClient.GetFromJsonAsync<List<UserDTO>>(
+                "api/User/pharmaciens"
+            ) ?? new List<UserDTO>();
+        }
+
+
 
     }
 }

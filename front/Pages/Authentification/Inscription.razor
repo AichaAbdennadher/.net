@@ -13,11 +13,10 @@
             <p class="text-3xl font-bold mb-4">
                 Medical Solution, your partner in health!
             </p>
-            <p class="text-large mt-2">
+            <p class="text-lg mt-2">
                 Save time and secure your prescriptions! With our app, doctors send their prescriptions directly
                 to pharmacists, so patients receive their medications quickly and safely.
             </p>
-
 
             <div class="relative mt-10 overflow-hidden rounded-md w-full">
                 <div class="flex h-72 transition-transform duration-700 ease-in-out"
@@ -32,7 +31,6 @@
 
         <!-- Right: Form -->
         <div class="md:w-1/2 w-full p-8 py-14">
-
             <EditForm Model="UserDTO" OnValidSubmit="Handlesubmit" class="space-y-6">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="text-red-500" />
@@ -43,111 +41,65 @@
                 </div>
 
                 <!-- INPUTS -->
-                <div>
+                <div class="space-y-4">
+                    <!-- Last Name -->
+                    <input placeholder="Last Name"
+                           @bind-value="UserDTO.Nom"
+                           required
+                           class="@InputClass" />
 
-                    <!-- Name -->
-                    <div class="mb-4">
-                        <input placeholder="Last Name"
-                               @bind-value="UserDTO.Nom"
-                               required
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                               focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
-                               dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                               transition duration-300" />
-                    </div>
-
-                    <!-- First name -->
-                    <div class="mb-4">
-                        <input placeholder="First Name"
-                               @bind-value="UserDTO.Prenom"
-                               required
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                               focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
-                               dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                               transition duration-300" />
-                    </div>
+                    <!-- First Name -->
+                    <input placeholder="First Name"
+                           @bind-value="UserDTO.Prenom"
+                           required
+                           class="@InputClass" />
 
                     <!-- Email -->
-                    <div class="mb-4">
-                        <input type="email" placeholder="Email"
-                               @bind-value="UserDTO.Email"
-                               required
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                               focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
-                               dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                               transition duration-300" />
-                    </div>
+                    <input type="email" placeholder="Email"
+                           @bind-value="UserDTO.Email"
+                           required
+                           class="@InputClass" />
 
                     <!-- Password -->
-                    <div class="mb-4">
-                        <input type="password" placeholder="Password"
-                               @bind-value="UserDTO.Password"
-                               required
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                               focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
-                               dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                               transition duration-300" />
-                    </div>
+                    <input type="password" placeholder="Password"
+                           @bind-value="UserDTO.Password"
+                           required
+                           class="@InputClass" />
 
                     <!-- Phone -->
-                    <div class="mb-4">
-                        <input placeholder="Phone" type="tel" pattern="[0-9]*"
-                               inputmode="numeric" @bind-value="UserDTO.Tel"
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                               focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
-                               dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                               transition duration-300" />
-                    </div>
+                    <input placeholder="Phone" type="tel" pattern="[0-9]*"
+                           inputmode="numeric" @bind-value="UserDTO.Tel"
+                           class="@InputClass" />
 
                     <!-- Address -->
-                    <div class="mb-4">
-                        <input placeholder="Address" @bind-value="UserDTO.Adresse"
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                               focus:outline-none focus:ring-2  focus:ring-[#50bfa2]
-                               dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                               transition duration-300" />
-                    </div>
+                    <input placeholder="Address" @bind-value="UserDTO.Adresse"
+                           class="@InputClass" />
 
                     <!-- Role -->
-                    <div class="mb-4 relative">
-                        <select @bind="RoleString" class="focus:ring-2 focus:ring-[#50bfa2] w-full h-12 px-3 py-2 border-none rounded-md"
-                                required>
-                            <!-- Placeholder : ne sera jamais sélectionnable -->
-                            <option value="" disabled hidden>Choisir un rôle</option>
+                    <InputSelect @bind-Value="RoleString"
+                                 class="focus:ring-2 focus:ring-[#50bfa2] w-full h-12 px-3 py-2 border-none rounded-md"
+                                 required>
+                        <option value="">Choisir un rôle</option>
+                        <option value="Medecin">Médecin</option>
+                        <option value="Pharmacien">Pharmacien</option>
+                    </InputSelect>
 
-                            <!-- Les vraies options -->
-                            <option value="Medecin">Médecin</option>
-                            <option value="Pharmacien">Pharmacien</option>
-                        </select>
-
-                    </div>
-                </div>
-
-                <!-- Speciality (Medecin) -->
-                @if (afficherSpecialite)
-                {
-                    <div class="mb-4">
+                    <!-- Speciality (Médecin) -->
+                    @if (afficherSpecialite)
+                    {
                         <input placeholder="Speciality"
                                @bind-value="UserDTO.Specialite"
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                                   focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
-                                   dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                                   transition duration-300" />
-                    </div>
-                }
+                               class="@InputClass" />
+                    }
 
-                <!-- Pharmacy (Pharmacien) -->
-                @if (afficherPharmacie)
-                {
-                    <div class="mb-4">
+                    <!-- Pharmacy (Pharmacien) -->
+                    @if (afficherPharmacie)
+                    {
                         <input placeholder="Pharmacy Name"
                                @bind-value="UserDTO.NomPharmacie"
-                               class="w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md
-                                   focus:outline-none focus:ring-2 focus:ring-[#50bfa2]
-                                   dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900
-                                   transition duration-300" />
-                    </div>
-                }
+                               class="@InputClass" />
+                    }
+                </div>
 
                 <!-- Error message -->
                 @if (!string.IsNullOrEmpty(Message))
@@ -158,27 +110,25 @@
                 <!-- Submit -->
                 <button type="submit"
                         style="background-color:#50bfa2;"
-                        class=" mt-2 w-full h-12 px-3 py-2 text-white font-semibold rounded-md transition-all duration-300 hover:scale-[1.02] hover:brightness-110">
+                        class="mt-2 w-full h-12 px-3 py-2 text-white font-semibold rounded-md transition-all duration-300 hover:scale-[1.02] hover:brightness-110">
                     Sign up
                 </button>
-           
+
                 <!-- Login link -->
                 <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
                     Already have an account?
                     <a href="/Authentification/Login" style="color:#50bfa2;" class="hover:underline transition duration-300">Login here</a>
                 </p>
-
             </EditForm>
         </div>
     </div>
 </section>
 
-
 @code {
     public UserDTO UserDTO { get; set; } = new UserDTO();
 
-    bool afficherSpecialite = false;
-    bool afficherPharmacie = false;
+    private bool afficherSpecialite = false;
+    private bool afficherPharmacie = false;
     private string Message;
 
     private int CurrentIndex = 0;
@@ -188,17 +138,6 @@
         "images/ph4.png",
         "images/ph6.png"
     };
-
-    protected override void OnInitialized()
-    {
-        var timer = new System.Timers.Timer(3000);
-        timer.Elapsed += (s, e) =>
-        {
-            CurrentIndex = (CurrentIndex + 1) % Images.Count;
-            InvokeAsync(StateHasChanged);
-        };
-        timer.Start();
-    }
 
     private string RoleString
     {
@@ -214,10 +153,26 @@
         }
     }
 
+    private string InputClass =>
+        "w-full h-12 px-3 py-2 text-base border border-gray-300 rounded-md " +
+        "focus:outline-none focus:ring-2 focus:ring-[#50bfa2] " +
+        "dark:bg-gray-700 dark:text-gray-900 bg-white text-gray-900 transition duration-300";
+
+    protected override void OnInitialized()
+    {
+        var timer = new System.Timers.Timer(3000);
+        timer.Elapsed += (s, e) =>
+        {
+            CurrentIndex = (CurrentIndex + 1) % Images.Count;
+            InvokeAsync(StateHasChanged);
+        };
+        timer.Start();
+    }
+
     private async Task Handlesubmit()
     {
         var result = await userServices.Register(UserDTO);
-      
+
         if (result)
             navigationManager.NavigateTo("/Authentification/Login");
         else

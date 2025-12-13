@@ -21,7 +21,7 @@ namespace metiers
         public int Stock { get; set; }
 
         public Guid UserID { get; set; }
-
+        public ICollection<LigneMedicament> LigneMedicaments { get; set; } = new List<LigneMedicament>();
 
     }
 }

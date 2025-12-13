@@ -8,18 +8,14 @@ public class LigneMedicament
     [Key]
     public int ligneID { get; set; }
     public int qtePrescrite { get; set; }
-    public int qteDelivre { get; set; }
+    public int? qteDelivre { get; set; }
     public DateTime? dateDelivre { get; set; }
 
     public string dose { get; set; }
-
-    public Statut statut { get; set; }
+    public Statut statut { get; set; } = Statut.EnAttente;
     public int ordID { get; set; }
+    public int MedicamentID { get; set; }      
+    public virtual Medicament? Medicament { get; set; }
 
-    [ForeignKey("ordID")]
-    public virtual Ordonnance Ordonnance { get; set; }
 
-    public int MedicamentID { get; set; }
-    [ForeignKey("MedicamentID")]
-    public virtual Medicament Medicament { get; set; }
 }

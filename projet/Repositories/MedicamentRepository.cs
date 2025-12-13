@@ -13,6 +13,24 @@ namespace projet.Repositories
             this.context = context;
         }
 
+        //public async Task<List<Medicament>> GetTousMedicaments()
+        //{
+        //    return await context.medicaments.ToListAsync();
+        //}
+        public async Task DiminuerStock(int medicamentId, int quantite)
+        {
+            var medicament = await context.medicaments.FindAsync(medicamentId);
+
+            if (medicament == null)
+                throw new Exception("Médicament introuvable");
+
+            if (medicament.Stock < quantite)
+                throw new Exception("Stock insuffisant");
+
+            medicament.Stock -= quantite;
+            await context.SaveChangesAsync();
+        }
+
         public async Task<Medicament> CreateMedicament(Medicament Medicament)
         {
             if (await context.medicaments.AnyAsync(d => d.Nom.Equals(Medicament.Nom)))
@@ -30,6 +48,7 @@ namespace projet.Repositories
                                .Where(m => m.UserID == id)   
                                .ToListAsync();
         }
+     
 
         public async Task<bool> UpdateMedicament(Medicament Medicament)
         {

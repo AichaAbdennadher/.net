@@ -1,0 +1,105 @@
+﻿@using metiers
+@inject MedicamentServices MedicamentServices
+@inject IJSRuntime JS
+@inject TempOrdonnanceService TempOrdonnanceService
+
+<div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+    <h3 class="text-lg font-semibold text-[#50bfa2] mb-4">Ajouter un médicament</h3>
+
+    <EditForm Model="medicamentModel" OnValidSubmit="HandleLigneSubmit" class="space-y-3">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <!-- Recherche et sélection médicament -->
+        <div>
+            <InputText @bind-Value="searchMedicament" placeholder="Rechercher un médicament..."
+                       class="w-full border rounded p-2" @oninput="FilterMedicaments" />
+            <select @bind="medicamentModel.Id" class="w-full border rounded p-2 mt-1">
+                <option value="">-- Sélectionner un médicament --</option>
+                @foreach (var m in filteredMedicaments)
+                {
+                    <option value="@m.MedicamentID">@m.Nom</option>
+                }
+            </select>
+        </div>
+
+        <InputText @bind-Value="medicamentModel.Dosage" placeholder="Dosage" class="w-full border rounded p-2" />
+        <InputNumber @bind-Value="medicamentModel.Quantite" placeholder="Quantité" class="w-full border rounded p-2" />
+
+        <div class="flex justify-end space-x-2">
+            <button type="button" class="px-4 py-2 border rounded" @onclick="CloseModal">Annuler</button>
+            <button type="submit" class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-4 py-2 rounded">Ajouter</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public EventCallback<LigneMedicament> OnLigneAdded { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public Ordonnance ParentOrdonnance { get; set; }
+
+    private MedicamentModel medicamentModel = new();
+    private List<Medicament> allMedicaments = new();
+    private List<Medicament> filteredMedicaments = new();
+    private string searchMedicament = "";
+
+    public class MedicamentModel
+    {
+        public int? Id { get; set; }
+        public string Dosage { get; set; } = "";
+        public int Quantite { get; set; } = 0;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMedicamentsByPharmacie();
+    }
+
+    public async Task LoadMedicamentsByPharmacie()
+    {
+        var pharmaID = ParentOrdonnance?.PharmacienID ?? TempOrdonnanceService.TempPharmacieID ?? Guid.Empty;
+        if (pharmaID != Guid.Empty)
+        {
+            allMedicaments = await MedicamentServices.GetMedicaments(pharmaID);
+            filteredMedicaments = allMedicaments;
+            StateHasChanged();
+        }
+    }
+
+    private void FilterMedicaments(ChangeEventArgs e)
+    {
+        searchMedicament = e.Value?.ToString() ?? "";
+        filteredMedicaments = string.IsNullOrWhiteSpace(searchMedicament) ? allMedicaments :
+            allMedicaments.FindAll(m => m.Nom.Contains(searchMedicament, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task HandleLigneSubmit()
+    {
+        if (medicamentModel.Id == null || medicamentModel.Quantite <= 0)
+        {
+            await JS.InvokeVoidAsync("showNotification", "Sélectionner un médicament et entrer une quantité valide !", "warning");
+            return;
+        }
+
+        var medicament = allMedicaments.Find(m => m.MedicamentID == medicamentModel.Id.Value);
+
+        var ligne = new LigneMedicament
+        {
+            MedicamentID = medicament.MedicamentID,
+            dose = medicamentModel.Dosage,
+            qtePrescrite = medicamentModel.Quantite,
+            Medicament = new Medicament { MedicamentID = medicament.MedicamentID, Nom = medicament.Nom, UserID = medicament.UserID }
+        };
+
+        TempOrdonnanceService.AddLigne(ligne);
+        await MedicamentServices.DiminuerStock(medicament.MedicamentID, medicamentModel.Quantite);
+        await OnLigneAdded.InvokeAsync(ligne);// notifier le parent
+                                              
+        await OnClose.InvokeAsync();// fermer le modal
+        medicamentModel = new MedicamentModel();
+        searchMedicament = "";
+        filteredMedicaments = allMedicaments;
+    }
+
+    private async Task CloseModal() => await OnClose.InvokeAsync();
+}

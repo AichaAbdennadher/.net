@@ -15,27 +15,14 @@ namespace metiers
         public bool envoyee { get; set; } = false;
         [Required]
         public Statut Statut { get; set; } = Statut.EnAttente;
-
-        // --- Relation avec Patient ---
         [Required]
         public int PatientID { get; set; }
-
-        [ForeignKey("PatientID")]
-        public virtual Patient Patient { get; set; } //ok
-
-        // --- Médecin qui crée l'ordonnance ---
+        public virtual Patient? Patient { get; set; } //ok
         [Required]
         public Guid MedecinID { get; set; }
-
-        // --- Pharmacien choisi ---
-        [Required]
         public Guid PharmacienID { get; set; }
 
-        //Récupération des ordonnances :
-        //Pour accéder au médecin : ordonnance.Medecin.Nom
-        //Pour accéder au pharmacien : ordonnance.Pharmacien.Nom
-
         // --- Lignes de médicaments ---
-        public ICollection<LigneMedicament> LigneMedicaments { get; set; }
+       // public ICollection<LigneMedicament> LigneMedicaments { get; set; }
     }
 }

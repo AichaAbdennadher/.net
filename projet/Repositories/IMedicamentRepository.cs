@@ -9,5 +9,7 @@ namespace projet.Repositories
         Task<Medicament> GetMedicament(int id);
         Task<bool> UpdateMedicament(Medicament Medicament);
         Task<bool> DeleteMedicament(int id); //medic heda wila mamnou3
+       /// Task<List<Medicament>> GetTousMedicaments();
+        Task DiminuerStock(int medicamentId, int quantite);
     }
 }

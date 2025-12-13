@@ -27,8 +27,12 @@ namespace projet.Repositories
 
         public async Task<List<Ordonnance>> GetOrdonnancesByMedecin(Guid medecinId)
         {
-            return await context.ordonnances.Where(p => p.PharmacienID == medecinId).ToListAsync();
+            return await context.ordonnances
+                .Where(o => o.MedecinID == medecinId)
+                .Include(o => o.Patient)
+                .ToListAsync();
         }
+
 
         public async Task<Ordonnance> GetOrdonnance(int id)
         {
@@ -42,7 +46,6 @@ namespace projet.Repositories
             if (dep == null)
                 return false;
             dep.PatientID = Ordonnance.PatientID;
-            dep.LigneMedicaments = Ordonnance.LigneMedicaments;
             await context.SaveChangesAsync();
             return true;
         }
@@ -89,7 +92,7 @@ namespace projet.Repositories
         public async Task<List<OrdonnanceInfoDTO>> GetDernieresOrdonnancesPharmacien(Guid pharmacienId)
         {
             return await context.ordonnances
-                .Include(o => o.Patient)
+              .Include(o => o.Patient)
                 .Join(context.users,
                 o => o.MedecinID.ToString(),
                 u => u.Id,
@@ -101,7 +104,7 @@ namespace projet.Repositories
                 {
                     OrdonnanceID = x.o.OrdID,
                     PatientNom = x.o.Patient.Nom,
-                    PatientPrenom = x.o.Patient.Prenom,
+                   PatientPrenom = x.o.Patient.Prenom,
                     MedecinNom = x.Medecin.Nom,
                     MedecinPrenom = x.Medecin.Prenom,
                     Statut = x.o.Statut,

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using metiers.shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using projet.Repositories;
@@ -16,28 +17,29 @@ namespace projet.Controllers
         this.repository = repository;
         }
 
-        // 🔥 Pharmaciens
-        [Authorize("Medecin")]
+        // Pharmaciens
+        [Authorize]
         [HttpGet("pharmaciens")]
         public async Task<IActionResult> GetPharmaciens()
         {
             var pharmaciens = await repository.GetPharmaciens();
 
-            var result = pharmaciens.Select(u => new
+            var result = pharmaciens.Select(u => new UserDTO
             {
-                userId = u.Id,
-                u.Nom,
-                u.Prenom,
-                u.Email,
-                u.Tel,
-                u.NomPharmacie
-            });
+                Id = Guid.Parse(u.Id),
+                Nom = u.Nom,
+                Prenom = u.Prenom,
+              //  Email = u.Email,
+                Tel = u.Tel,
+                NomPharmacie = u.NomPharmacie,
+                Role = Role.Pharmacien
+            }).ToList();
 
             return Ok(result);
         }
 
         // 🔥 Médecins sauf connecté
-        [Authorize("Pharmacien")]
+        //[Authorize("Pharmacien")]
         [HttpGet("medecins")]
         public async Task<IActionResult> GetMedecinsExceptConnected()
         {

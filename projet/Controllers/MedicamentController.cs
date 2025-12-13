@@ -1,4 +1,5 @@
 ﻿using metiers;
+using metiers.shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using projet.Repositories;
@@ -16,6 +17,27 @@ namespace projet.Controllers
         {
             this.repository = repository;
         }
+
+        //[HttpGet]
+        //public async Task<IActionResult> GetTousMedicaments()
+        //{
+        //    var Medicaments = await repository.GetTousMedicaments();
+        //    return Ok(Medicaments);
+        //}
+        [HttpPost("diminuer-stock")]
+        public async Task<IActionResult> DiminuerStock( DiminuerStockDto dto)
+        {
+            try
+            {
+                await repository.DiminuerStock(dto.medicamentId, dto.quantite);
+                return Ok(new { message = "Stock mis à jour avec succès" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         [HttpGet("Medicaments/ph/{userId}")]
         public async Task<IActionResult> GetMedicaments(Guid userId)

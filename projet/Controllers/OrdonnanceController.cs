@@ -1,6 +1,7 @@
 ﻿using metiers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using projet.Repositories;
 
 namespace projet.Controllers

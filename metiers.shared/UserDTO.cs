@@ -10,6 +10,7 @@ namespace metiers.shared
 
     public class UserDTO
     {
+        public Guid Id { get; set; }
         public string Nom { get; set; }
         public string Prenom { get; set; }
         [EmailAddress]

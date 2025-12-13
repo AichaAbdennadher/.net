@@ -8,8 +8,9 @@ namespace metiers
 {
     public enum Statut
     {
-        EnAttente,
-        Delivree,
-        PartiellementDelivree
+        EnAttente =0,
+        Delivree=1,
+        PartiellementDelivree=2,nonEnvoye=3
+          
     }
 }

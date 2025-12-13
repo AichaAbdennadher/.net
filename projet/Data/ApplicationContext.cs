@@ -16,16 +16,20 @@ public class ApplicationContext : IdentityDbContext<projet.Data.ApplicationUser>
         base.OnModelCreating(modelBuilder);
 
 
+        modelBuilder.Entity<Patient>()
+            .HasIndex(p => p.CIN)
+            .IsUnique();
 
-        // LigneMedicament → Ordonnance : CASCADE
         modelBuilder.Entity<LigneMedicament>()
-            .HasOne(l => l.Ordonnance)
-            .WithMany(o => o.LigneMedicaments)
-            .HasForeignKey(l => l.ordID)
-            .OnDelete(DeleteBehavior.Cascade);
+         .HasOne(l => l.Medicament)
+         .WithMany(o => o.LigneMedicaments)
+         .HasForeignKey(l => l.MedicamentID)
+         .OnDelete(DeleteBehavior.Cascade);
 
-        
-        
+
+
+
+
     }
 
 }

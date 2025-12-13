@@ -1,6 +1,7 @@
 ﻿using metiers;
 using Microsoft.EntityFrameworkCore;
 using projet.Data;
+using System;
 
 namespace projet.Repositories
 {
@@ -13,11 +14,31 @@ namespace projet.Repositories
             this.context = context;
         }
 
+        public async Task<LigneMedicament> CreateLigneMedicament(LigneMedicament LigneMedicament)
+        {
+            if (await context.lignesMedicaments.AnyAsync(d => d.ligneID == LigneMedicament.ligneID))
+            {
+                return null;
+            }
+            LigneMedicament.Medicament = null;
+            await context.lignesMedicaments.AddAsync(LigneMedicament);
+            await context.SaveChangesAsync();
+            return LigneMedicament;
+        }
+
+
+        public async Task<List<LigneMedicament>> GetLignesByOrdonnance(int ordID)
+        {
+            return await context.lignesMedicaments
+                .Include(l => l.Medicament) // pour pouvoir accéder à ligne.Medicament.Nom
+                .Where(l => l.ordID == ordID)
+                .ToListAsync();
+        }
         public async Task<List<LigneMedicament>> GetLignesMedicamentPharmacien(Guid pharmacienId)
         {
             return await context.lignesMedicaments
-                                .Include(lm => lm.Medicament) // Inclut le médicament pour accéder à son UserID et stock
-                                .Where(lm => lm.Medicament.UserID == pharmacienId)
+                               // .Include(lm => lm.Medicament) // Inclut le médicament pour accéder à son UserID et stock
+                               // .Where(lm => lm.Medicament.UserID == pharmacienId)
                                 .ToListAsync();
         }
 
@@ -26,47 +47,47 @@ namespace projet.Repositories
             return await context.lignesMedicaments.FindAsync(id);
         }
 
-        public async Task<bool> DelivrerLigneMedicament(int ligneId)
-        {
-            var ligne = await context.lignesMedicaments
-                                     .Include(l => l.Medicament)
-                                     .FirstOrDefaultAsync(l => l.ligneID == ligneId);
+        //public async Task<bool> DelivrerLigneMedicament(int ligneId)
+        //{
+        //    var ligne = await context.lignesMedicaments
+        //                            .Include(l => l.Medicament)
+        //                             .FirstOrDefaultAsync(l => l.ligneID == ligneId);
 
-            if (ligne == null || ligne.Medicament == null)
-                return false;
+        //    if (ligne == null || ligne.Medicament == null)
+        //        return false;
 
-            int stock = ligne.Medicament.Stock;
-            int qteDemandee = ligne.qtePrescrite;
-            int qteDejaDelivree = ligne.qteDelivre;
+        //    int stock = ligne.Medicament.Stock;
+        //    int qteDemandee = ligne.qtePrescrite;
+        //    int qteDejaDelivree = ligne.qteDelivre;
 
-            int qteRestante = qteDemandee - qteDejaDelivree;
+        //    int qteRestante = qteDemandee - qteDejaDelivree;
 
-            if (qteRestante <= 0)
-                return false; // Déjà totalement délivrée
+        //    if (qteRestante <= 0)
+        //        return false; // Déjà totalement délivrée
 
-            // Quantité à délivrer selon le stock
-            int qteAjustee = Math.Min(stock, qteRestante);
+        //    // Quantité à délivrer selon le stock
+        //    int qteAjustee = Math.Min(stock, qteRestante);
 
-            // Mise à jour de la quantité délivrée
-            ligne.qteDelivre += qteAjustee;
+        //    // Mise à jour de la quantité délivrée
+        //    ligne.qteDelivre += qteAjustee;
 
-            // Mise à jour du stock du médicament
-            ligne.Medicament.Stock -= qteAjustee;
+        //    // Mise à jour du stock du médicament
+        //    ligne.Medicament.Stock -= qteAjustee;
 
-            // Mise à jour du statut
-            if (ligne.qteDelivre == ligne.qtePrescrite)
-                ligne.statut = Statut.Delivree;
-            else if (ligne.qteDelivre > 0 && ligne.qteDelivre < ligne.qtePrescrite)
-                ligne.statut = Statut.PartiellementDelivree;
-            else
-                ligne.statut = Statut.EnAttente;
+        //    // Mise à jour du statut
+        //    if (ligne.qteDelivre == ligne.qtePrescrite)
+        //        ligne.statut = Statut.Delivree;
+        //    else if (ligne.qteDelivre > 0 && ligne.qteDelivre < ligne.qtePrescrite)
+        //        ligne.statut = Statut.PartiellementDelivree;
+        //    else
+        //        ligne.statut = Statut.EnAttente;
 
-            // Date délivrance
-            ligne.dateDelivre = DateTime.Now;
+        //    // Date délivrance
+        //    ligne.dateDelivre = DateTime.Now;
 
-            await context.SaveChangesAsync();
-            return true;
-        }
+        //    await context.SaveChangesAsync();
+        //    return true;
+        //}
 
     }
 }

@@ -2,6 +2,7 @@
 using metiers;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 
 namespace front.Services
 {
@@ -25,13 +26,30 @@ namespace front.Services
             else
                 _httpClient.DefaultRequestHeaders.Authorization = null;
         }
+        public async Task DiminuerStock(int medicamentId, int quantite)
+        {
+            var response = await _httpClient.PostAsJsonAsync(
+                "api/Medicament/diminuer-stock",
+                new
+                {
+                    medicamentId = medicamentId,
+                    quantite = quantite
+                }
+            );
 
-        public async Task<List<Medicament>> GetMedicaments(string userId)
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception(error);
+            }
+        }
+        public async Task<List<Medicament>> GetMedicaments(Guid userId)
         {
             await AddJwtHeaderAsync();
             return await _httpClient.GetFromJsonAsync<List<Medicament>>($"api/Medicament/Medicaments/ph/{userId}");
         }
 
+     
         public async Task<Medicament> GetMedicament(int id)
         {
             await AddJwtHeaderAsync();
@@ -62,10 +80,14 @@ namespace front.Services
 
         public async Task<Medicament> GetMedicamentAsync(int id)
         {
-            return await _httpClient.
-                GetFromJsonAsync<Medicament>($"api/Medicament/{id}");
+            return await _httpClient.GetFromJsonAsync<Medicament>($"api/Medicament/{id}");
         }
 
+        //public async Task<List<Medicament>> GetTousMedicaments()
+        //{
+        //    await AddJwtHeaderAsync();
+        //    return await _httpClient.GetFromJsonAsync<List<Medicament>>($"api/Medicament");
+        //}
     }
 }
 

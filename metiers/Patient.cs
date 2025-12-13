@@ -10,8 +10,7 @@ namespace metiers
         [Key]
         public int PatientID { get; set; }  
 
-        [Required]
-        [StringLength(8)]
+        [StringLength(8, ErrorMessage = "The ID card must contain exactly 8 characters.")]
         public string CIN { get; set; }     
 
         [Required]
@@ -33,8 +32,6 @@ namespace metiers
         [StringLength(200)]
         public string Adresse { get; set; }
 
-
-        //realtion 1-*
         public Guid MedecinID { get; set; }
 
     }
