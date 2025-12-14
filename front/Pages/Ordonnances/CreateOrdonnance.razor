@@ -5,95 +5,123 @@
 @inject OrdonnanceServices OrdonnanceServices
 @inject LigneMedicamentServices LigneMedicamentServices
 @inject TempOrdonnanceService TempOrdonnanceService
+@inject MedicamentServices MedicamentServices
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
-<div class="relative">
-    <!-- Formulaire Ordonnance -->
-    <EditForm Model="Ordonnance" OnValidSubmit="HandleSubmit" class="space-y-4">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="text-red-500" />
-
-        <!-- Patient -->
-        <div class="relative">
-            <InputText @bind-Value="searchPatient" @oninput="FilterPatients" placeholder="Rechercher un patient"
-                       class="w-full p-2 border rounded" />
-            @if (filteredPatients.Any() && !string.IsNullOrWhiteSpace(searchPatient))
-            {
-                <ul class="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
-                    @foreach (var p in filteredPatients)
-                    {
-                        <li class="p-2 hover:bg-[#50bfa2] hover:text-white cursor-pointer" @onclick="() => SelectPatient(p)">
-                            @($"{p.CIN} {p.Nom} {p.Prenom}")
-                        </li>
-                    }
-                </ul>
-            }
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b p-4">
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Create a prescription</h3>
+            <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
         </div>
 
-        <!-- Pharmacie -->
-        <div class="relative">
-            <InputText @bind-Value="searchPharmacie" @oninput="FilterPharmacies" placeholder="Rechercher une pharmacie"
-                       class="w-full p-2 border rounded" />
-            @if (filteredPharmacies.Any() && !string.IsNullOrWhiteSpace(searchPharmacie))
-            {
-                <ul class="absolute z-10 bg-white border rounded w-full max-h-40 overflow-y-auto">
-                    @foreach (var ph in filteredPharmacies)
-                    {
-                        <li class="p-2 hover:bg-[#50bfa2] hover:text-white cursor-pointer" @onclick="() => SelectPharmacie(ph)">
-                            @ph.NomPharmacie
-                        </li>
-                    }
-                </ul>
-            }
-        </div>
+        <EditForm Model="Ordonnance" OnValidSubmit="HandleSubmit" class="px-6 py-4 space-y-4">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-red-500" />
 
-        <!-- Bouton ajouter une ligne -->
-        <button type="button" class="bg-[#50bfa2] text-white px-4 py-2 rounded" @onclick="ShowModal">
-            Ajouter un médicament
-        </button>
+            <!-- Patient -->
+            <div class="mb-4 relative w-full">
+                <label class="block mb-1 text-sm font-normal text-gray-500">Patient</label>
+                <InputText @bind-Value="searchPatient" @oninput="FilterPatients"
+                           placeholder="Search a patient"
+                           class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @if (filteredPatients.Any() && !string.IsNullOrWhiteSpace(searchPatient))
+                {
+                    <ul class="absolute top-full left-0 z-10 bg-white border rounded w-full max-h-40 overflow-y-auto shadow-md">
+                        @foreach (var p in filteredPatients)
+                        {
+                            <li class="p-2 hover:bg-[#50bfa2] hover:text-white cursor-pointer" @onclick="() => SelectPatient(p)">
+                                @($"{p.CIN} {p.Nom} {p.Prenom}")
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
 
-        <!-- Tableau des lignes -->
-        <div class="overflow-x-auto mt-2">
-            <table class="w-full text-sm text-left border">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-4 py-2">Nom</th>
-                        <th class="px-4 py-2">Dosage</th>
-                        <th class="px-4 py-2">Quantité</th>
-                        <th class="px-4 py-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var ligne in TempOrdonnanceService.GetLignes())
-                    {
-                        <tr class="border-t">
-                            <td class="px-4 py-2">@ligne.Medicament?.Nom</td>
-                            <td class="px-4 py-2">@ligne.dose</td>
-                            <td class="px-4 py-2">@ligne.qtePrescrite</td>
-                            <td class="px-4 py-2">
-                                <button class="text-red-500" @onclick="() => RemoveLigne(ligne)">Supprimer</button>
-                            </td>
+            <!-- Pharmacie -->
+            <div class="mb-4 relative w-full">
+                <label class="block mb-1 text-sm font-normal text-gray-500">Pharmacy</label>
+                <InputText @bind-Value="searchPharmacie" @oninput="FilterPharmacies"
+                           placeholder="Search a pharmacy"
+                           class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+                @if (filteredPharmacies.Any() && !string.IsNullOrWhiteSpace(searchPharmacie))
+                {
+                    <ul class="absolute top-full left-0 z-10 bg-white border rounded w-full max-h-40 overflow-y-auto shadow-md">
+                        @foreach (var ph in filteredPharmacies)
+                        {
+                            <li class="p-2 hover:bg-[#50bfa2] hover:text-white cursor-pointer" @onclick="() => SelectPharmacie(ph)">
+                                @ph.NomPharmacie
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+            <!-- Ajouter un médicament -->
+            <div class="flex justify-between items-center mb-2">
+                <label class="text-sm font-normal text-gray-500">Medicines</label>
+                <span class="inline-flex items-center cursor-pointer text-white font-medium rounded-lg text-base px-2 bg-gray-200 hover:bg-gray-300"
+                    @onclick="ShowModal">
+                    <i class='bx bx-plus text-gray-500 text-2xl'></i>
+                </span>
+            </div>
+
+
+            <!-- Tableau des lignes -->
+            <div >
+                <table class="w-full text-sm text-left border ">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-4 py-2">Medicine name</th>
+                            <th class="px-4 py-2">Dosage</th>
+                            <th class="px-4 py-2">Quantity</th>
+                            <th class="px-4 py-2">Actions</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var ligne in TempOrdonnanceService.GetLignes())
+                        {
+                            <tr class="border-t">
+                                <td class="px-4 py-2">@ligne.Medicament?.Nom</td>
+                                <td class="px-4 py-2">@ligne.dose</td>
+                                <td class="px-4 py-2">@ligne.qtePrescrite</td>
+                                <td class="px-4 py-2">
+                                    <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100" @onclick="() => EditLigne(ligne)">
+                                        <i class='bx bx-edit text-gray-500 text-2xl'></i>
+                                    </span>
+                                    <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100" @onclick="() => RemoveLigne(ligne)">
+                                        <i class='bx bxs-trash text-red-500 text-2xl'></i>
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-        <button type="submit" class="bg-[#50bfa2] text-white px-4 py-2 rounded mt-4">
-            Enregistrer Ordonnance
-        </button>
-    </EditForm>
+            <!-- Buttons -->
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button type="button" @onclick="Cancel" class="bg-gray-300 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-normal text-[#6f7885]">Cancel</button>
+                <button type="submit" class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-5 py-2.5 rounded-lg text-sm font-medium">Save</button>
+            </div>
+        </EditForm>
 
-    <!-- Modal LignesMedicamentsCreate -->
-    @if (showModal)
-    {
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <LignesMedicamentsCreate ParentOrdonnance="Ordonnance"
-                                     OnLigneAdded="OnLigneAdded"
-                                     OnClose="CloseModal" />
-        </div>
-    }
+        <!-- Modal Add/Edit -->
+        @if (showModal)
+        {
+            <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <LignesMedicamentsForm ParentOrdonnance="Ordonnance"
+                                       Ligne="ligneToEdit"
+                                       OnLigneSaved="OnLigneSaved"
+                                       OnClose="CloseModal" />
+            </div>
+        }
+    </div>
 </div>
 
 @code {
@@ -107,6 +135,7 @@
     private string searchPharmacie = "";
 
     private bool showModal = false;
+    private LigneMedicament ligneToEdit;
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,31 +188,43 @@
     private void RemoveLigne(LigneMedicament ligne)
     {
         TempOrdonnanceService.RemoveLigne(ligne);
+        StateHasChanged();
     }
 
-    private void OnLigneAdded(LigneMedicament ligne)
+    private void EditLigne(LigneMedicament ligne)
     {
+        ligneToEdit = ligne;
+        showModal = true;
+    }
+
+    private void OnLigneSaved(LigneMedicament ligne)
+    {
+        ligneToEdit = null;
+        showModal = false;
         StateHasChanged();
     }
 
     private async Task ShowModal()
     {
+        ligneToEdit = null;
         showModal = true;
         await JS.InvokeVoidAsync("document.body.style.setProperty", "overflow", "hidden");
     }
 
     private async Task CloseModal()
     {
+        ligneToEdit = null;
         showModal = false;
         await JS.InvokeVoidAsync("document.body.style.removeProperty", "overflow");
         StateHasChanged();
     }
 
+    private void Cancel() => Navigation.NavigateTo("/Ordonnances/ListOrdonnances");
+
     private async Task HandleSubmit()
     {
         if (!TempOrdonnanceService.GetLignes().Any())
         {
-            await JS.InvokeVoidAsync("alert", "Ajouter au moins une ligne !");
             return;
         }
 
@@ -197,6 +238,7 @@
         {
             ligne.ordID = Ordonnance.OrdID;
             await LigneMedicamentServices.CreateLigneMedicament(ligne);
+            await MedicamentServices.DiminuerStock(ligne.MedicamentID, ligne.qtePrescrite);
         }
 
         TempOrdonnanceService.Clear();

@@ -6,31 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>front</title>
     <base href="/" />
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <!-- Font Awesome Free -->
+
+    <!-- ================= TOASTR ================= -->
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+
+    <!-- jQuery (obligatoire pour Toastr) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- ✅ Toastr Config (SANS ICÔNE) -->
+    <script>
+        window.showToastr = function (type, message) {
+            toastr.options = {
+                closeButton: false,
+                progressBar: false,
+                positionClass: "toast-top-right",
+                timeOut: 4000,
+                newestOnTop: true,
+                preventDuplicates: true,
+
+                /* 🔥 suppression totale des icônes */
+                iconClasses: {
+                    error: "",
+                    info: "",
+                    success: "",
+                    warning: ""
+                }
+            };
+
+            toastr.clear();
+            toastr[type](message);
+        };
+    </script>
+    <!-- ========================================== -->
+    <!-- Icons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- ✅ Tailwind CSS (output.css généré par npm run build:css ou watch:css) -->
+    <!-- Tailwind -->
     <link href="css/output.css" rel="stylesheet" />
 
-    <!-- Autres styles -->
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- App CSS -->
     <link rel="stylesheet" href="css/app.css" />
+
+    <!-- PWA -->
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="front.styles.css" rel="stylesheet" />
     <link href="manifest.webmanifest" rel="manifest" />
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 
+    <!-- Autres JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/notifications.js"></script>
-
-
-    <!-- Ton JavaScript -->
     <script src="js/theme.js"></script>
 
-    <!-- Important mais vide dans ton cas -->
     <script type="importmap"></script>
 </head>
 
@@ -46,7 +82,6 @@
     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="." class="reload">Reload</a>
-        <span class="dismiss">🗙</span>
     </div>
 
     <script src="_framework/blazor.webassembly.js"></script>

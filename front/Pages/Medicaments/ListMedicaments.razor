@@ -45,7 +45,7 @@
                             <th class="px-4 py-3">Name</th>
                             <th class="px-4 py-3">Description</th>
                             <th class="px-4 py-3">Stock</th>
-                           
+
                             <th class="px-4 py-3" colspan="2">Actions</th>
                         </tr>
                     </thead>
@@ -58,7 +58,7 @@
                                 <td class="px-4 py-3">@Medicament.Nom</td>
                                 <td class="px-4 py-3">@Medicament.Description</td>
                                 <td class="px-4 py-3">@Medicament.Stock</td>
-                               
+
 
                                 <td class="px-4 py-3 flex space-x-2">
                                     <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
@@ -104,27 +104,27 @@
         await LoadMedicaments(currentPage);
     }
 
-  private async Task LoadMedicaments(int page)
-{
-    currentPage = page;
-
-    // Récupérer l'ID depuis le localStorage
-    string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
-    medecinIdString = medecinIdString?.Trim('"');
-
-    // Convertir en Guid
-    if (!Guid.TryParse(medecinIdString, out Guid medecinId))
+    private async Task LoadMedicaments(int page)
     {
-        // Gestion d'erreur si le guid n'est pas valide
-        await JS.InvokeVoidAsync("showNotification", "ID médecin invalide !", "error");
-        return;
+        currentPage = page;
+
+        // Récupérer l'ID depuis le localStorage
+        string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+        medecinIdString = medecinIdString?.Trim('"');
+
+        // Convertir en Guid
+        if (!Guid.TryParse(medecinIdString, out Guid medecinId))
+        {
+            // Gestion d'erreur si le guid n'est pas valide
+            await JS.InvokeVoidAsync("showNotification", "ID médecin invalide !", "error");
+            return;
+        }
+
+        // Passer le Guid au service
+        Medicaments = await MedicamentServices.GetMedicaments(medecinId);
+
+        StateHasChanged();
     }
-
-    // Passer le Guid au service
-    Medicaments = await MedicamentServices.GetMedicaments(medecinId);
-
-    StateHasChanged();
-}
 
     private void OnSearchChanged(ChangeEventArgs e)
     {
@@ -135,4 +135,3 @@
     private void Delete(int id) => Navigation.NavigateTo($"/Medicaments/Delete/{id}");
     private void CreerMedicament() => Navigation.NavigateTo("/Medicaments/Create");
 }
-

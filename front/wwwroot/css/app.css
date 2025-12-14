@@ -1,31 +1,29 @@
-/* Global font */
+/* ================= GLOBAL ================= */
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-
-.container, .page-content, .main-content {
-    margin-top: 0 !important; /* Enlever la marge en haut */
-    padding-top: 0 !important; /* Enlever le padding en haut */
+.container,
+.page-content,
+.main-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
-/* Focus removal for headings */
+
 h1:focus {
     outline: none;
 }
 
-
-
-/* Supprimer la marge autour du logo */
 img {
     margin-top: 0 !important;
 }
 
-/* Links */
-a, .btn-link {
+a,
+.btn-link {
     color: #0071c1;
 }
 
-/* Loading progress */
+/* ================= LOADING ================= */
 .loading-progress {
     position: absolute;
     display: block;
@@ -60,12 +58,12 @@ a, .btn-link {
         content: var(--blazor-load-percentage-text, "Loading");
     }
 
-/* Code styling */
+/* ================= CODE ================= */
 code {
     color: #c02d76;
 }
 
-/* Blazor error UI */
+/* ================= BLAZOR ERROR UI ================= */
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;
@@ -88,7 +86,7 @@ code {
     }
 
 .blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,...) no-repeat 1rem/1.8rem, #b32121;
+    background: #b32121;
     padding: 1rem 1rem 1rem 3.7rem;
     color: white;
 }
@@ -97,7 +95,7 @@ code {
         content: "An error has occurred.";
     }
 
-/* Form validations */
+/* ================= VALIDATION ================= */
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
@@ -114,10 +112,12 @@ code {
     color: #50bfa2 !important;
     font-weight: 600;
 }
+
+/* ================= FLATPICKR ================= */
 .flatpickr-calendar {
-    font-size: 12px; /* réduit la taille du texte */
+    font-size: 12px;
     padding: 5px;
-    width: auto; /* laisse s'adapter la largeur */
+    width: auto;
 }
 
 .flatpickr-day {
@@ -127,28 +127,50 @@ code {
     margin: 1px;
 }
 
-.custom-toast {
-    background: linear-gradient(135deg, #4CAF50, #2E7D32);
-    color: white;
-    border-radius: 12px;
-    padding: 12px 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+/* ================= TOASTR ROUGE SANS ICÔNE ================= */
+#toast-container {
+    position: fixed !important;
+    z-index: 99999 !important;
 }
 
-.custom-toast-title {
-    font-weight: 700;
+.toast-top-right {
+    top: 1rem !important;
+    right: 1rem !important;
 }
 
-.custom-toast-message {
-    font-weight: 400;
+.toast {
+    background-color: #dc3545 !important; /* ROUGE GARANTI */
+    color: #fff !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+    font-size: 14px;
+    opacity: 1 !important;
 }
 
-
-.success {
-    background-color: #50bfa2; /* orange */
+/* Forcer rouge pour les erreurs */
+.toast-error {
+    background-color: #dc3545 !important;
+    color: #fff !important;
 }
 
-.error {
-    background-color: #dc3545; /* rouge */
+    /* Supprimer toutes icônes Toastr */
+    .toast::before,
+    .toast-message::before,
+    .toast-success::before,
+    .toast-error::before,
+    .toast-warning::before,
+    .toast-info::before {
+        content: none !important;
+        display: none !important;
+    }
+
+/* Supprimer padding réservé à l’icône */
+.toast-message {
+    padding-left: 0 !important;
 }
 
+/* Supprimer bouton fermer */
+.toast-close-button {
+    display: none !important;
+}
