@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using metiers;
 
 namespace front.Services
@@ -19,13 +20,38 @@ namespace front.Services
         // Ajouter une ligne
         public void AddLigne(LigneMedicament ligne)
         {
-            _tempLignes.Add(ligne);
+            // Vérifier si la ligne existe déjà (même médicament)
+            var existing = _tempLignes.FirstOrDefault(l => l.ligneID == ligne.ligneID);
+            if (existing == null)
+            {
+                _tempLignes.Add(ligne);
+            }
+            else
+            {
+                UpdateLigne(ligne);
+            }
+        }
+
+        // Mettre à jour une ligne
+        public void UpdateLigne(LigneMedicament ligne)
+        {
+            var existing = _tempLignes.FirstOrDefault(l => l.ligneID == ligne.ligneID);
+            if (existing != null)
+            {
+                existing.MedicamentID = ligne.MedicamentID;
+                existing.Medicament = ligne.Medicament;
+                existing.qtePrescrite = ligne.qtePrescrite;
+                existing.qteDelivre = ligne.qteDelivre;
+                existing.dose = ligne.dose;
+                existing.dateDelivre = ligne.dateDelivre;
+                existing.statut = ligne.statut;
+            }
         }
 
         // Supprimer une ligne
         public void RemoveLigne(LigneMedicament ligne)
         {
-            _tempLignes.Remove(ligne);
+            _tempLignes.RemoveAll(l => l.ligneID == ligne.ligneID);
         }
 
         // Récupérer toutes les lignes
@@ -34,6 +60,16 @@ namespace front.Services
             return _tempLignes;
         }
 
+        // Récupérer une ligne par son ID
+        public LigneMedicament GetLigneParId(int ligneID)
+        {
+            return _tempLignes.FirstOrDefault(l => l.ligneID == ligneID);
+        }
+        // initialiser tout
+        public void SetLignes(List<LigneMedicament> lignes)
+        {
+            _tempLignes = lignes ?? new List<LigneMedicament>();
+        }
         // Réinitialiser tout
         public void Clear()
         {

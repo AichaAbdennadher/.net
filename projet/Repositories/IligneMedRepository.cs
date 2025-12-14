@@ -12,6 +12,7 @@ namespace projet.Repositories
         // Task<bool> DelivrerLigneMedicament(int ligneId);
 
         Task<LigneMedicament> CreateLigneMedicament(LigneMedicament LigneMedicament);
+        Task<bool> UpdateLigneMedicament(LigneMedicament LigneMedicament);
 
     }
   

@@ -18,15 +18,22 @@ namespace projet.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLigneMedicament(LigneMedicament LigneMedicament)
+        public async Task<IActionResult> CreateLigneMedicament(LigneMedicament ligneMedicament)
         {
             //List<LigneMedicament> LigneMedicaments = await repository.GetLignesBy(LigneMedicament.Medicament.Nom);
             //if (LigneMedicaments.Any(d => d.Medicament.Nom == LigneMedicament.Medicament.Nom))
             //{
             //    return BadRequest("LigneMedicament existe!!");
             //}
-            LigneMedicament newLigneMedicament = await repository.CreateLigneMedicament(LigneMedicament);
+            LigneMedicament newLigneMedicament = await repository.CreateLigneMedicament(ligneMedicament);
             return CreatedAtAction(nameof(GetlMedByID), new { id = newLigneMedicament.ligneID }, newLigneMedicament);
+        }
+        [HttpPut]
+        public async Task<IActionResult> updateLigneMedicament(LigneMedicament ligneMedicament)
+        {
+            var result = await repository.UpdateLigneMedicament(ligneMedicament);
+            if (result) return NoContent();
+            return BadRequest("erreur update");
         }
 
 
@@ -43,6 +50,16 @@ namespace projet.Controllers
         {
             return Ok(await repository.GetligneMedicament(id));
 
+        }
+
+        [HttpGet("byOrdonnance/{ordID}")]
+        public async Task<ActionResult<List<LigneMedicament>>> GetByOrdonnance(int ordID)
+        {
+            var lignes = await repository.GetLignesByOrdonnance(ordID);
+            if (lignes == null || !lignes.Any())
+                return NotFound();
+
+            return Ok(lignes);
         }
 
         //[HttpPut("delivrer/{ligneId}")]

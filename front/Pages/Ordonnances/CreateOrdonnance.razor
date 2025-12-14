@@ -8,6 +8,7 @@
 @inject MedicamentServices MedicamentServices
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@implements IDisposable
 
 <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
@@ -220,6 +221,11 @@
     }
 
     private void Cancel() => Navigation.NavigateTo("/Ordonnances/ListOrdonnances");
+
+    public void Dispose()
+    {
+        TempOrdonnanceService.Clear();
+    }
 
     private async Task HandleSubmit()
     {

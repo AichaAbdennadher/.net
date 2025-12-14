@@ -1,5 +1,234 @@
-﻿<h3>EditOrdonnance</h3>
+﻿@page "/Ordonnances/Edit/{id:int}"
+@using metiers
+
+@inject PatientServices PatientServices
+@inject UserServices UserServices
+@inject OrdonnanceServices OrdonnanceServices
+@inject LigneMedicamentServices LigneMedicamentServices
+@inject TempOrdonnanceService TempOrdonnanceService
+@inject MedicamentServices MedicamentServices
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IDisposable
+
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b p-4">
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Update prescription</h3>
+            <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round"
+                          d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
+        </div>
+
+        <EditForm Model="Ordonnance" OnValidSubmit="HandleUpdate" class="px-6 py-4 space-y-4">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <!-- Patient -->
+            <div class="relative">
+                <label class="text-sm text-gray-500">Patient</label>
+                <InputText class="w-full p-2 border rounded"
+                           @bind-Value="searchPatient"
+                           @oninput="FilterPatients"
+                           placeholder="Search patient" />
+                @if (filteredPatients.Any())
+                {
+                    <ul class="absolute bg-white border w-full max-h-40 overflow-y-auto z-10">
+                        @foreach (var p in filteredPatients)
+                        {
+                            <li class="p-2 hover:bg-[#50bfa2] hover:text-white cursor-pointer"
+                                @onclick="() => SelectPatient(p)">
+                                @($"{p.CIN} {p.Nom} {p.Prenom}")
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+
+       
+
+            <!-- Medicines -->
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-500">Medicines</span>
+                <button type="button" @onclick="OpenAddModal">
+                    <i class='bx bx-plus text-2xl text-gray-600'></i>
+                </button>
+            </div>
+
+            <!-- Table -->
+            <table class="w-full text-sm border">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-2">Medicine</th>
+                        <th class="p-2">Dose</th>
+                        <th class="p-2">Quantity</th>
+                        <th class="p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in TempOrdonnanceService.GetLignes())
+                    {
+                        <tr class="border-t">
+                            <td class="p-2">@l.Medicament?.Nom</td>
+                            <td class="p-2">@l.dose</td>
+                            <td class="p-2">@l.qtePrescrite</td>
+                            <td class="p-2 space-x-2">
+                                <button type="button" @onclick="() => EditLigne(l)">
+                                    <i class='bx bx-edit text-xl'></i>
+                                </button>
+                                <button type="button" @onclick="() => RemoveLigne(l)">
+                                    <i class='bx bxs-trash text-xl text-red-500'></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Footer -->
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button type="button" @onclick="Cancel"
+                        class="bg-gray-300 px-4 py-2 rounded">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="bg-[#50bfa2] text-white px-4 py-2 rounded">
+                    Save
+                </button>
+            </div>
+        </EditForm>
+
+        @if (showModal)
+        {
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <LignesMedicamentsForm Ligne="ligneToEdit"
+                                       ParentOrdonnance="Ordonnance"
+                                       OnLigneSaved="OnLigneSaved"
+                                       OnClose="CloseModal" />
+            </div>
+        }
+    </div>
+</div>
 
 @code {
+    [Parameter] public int id { get; set; }
 
+    Ordonnance Ordonnance = new();
+    List<Patient> Patients = new();
+    List<Patient> filteredPatients = new();
+    List<UserDTO> Pharmacies = new();
+    List<UserDTO> filteredPharmacies = new();
+
+    string searchPatient = "";
+    string searchPharmacie = "";
+
+    bool showModal;
+    LigneMedicament ligneToEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = (await JS.InvokeAsync<string>("localStorage.getItem", "userId"))?.Trim('"');
+        Ordonnance = await OrdonnanceServices.GetOrdonnance(id);
+
+        var lignes = await LigneMedicamentServices.GetLigneMedicamentsByOrd(id);
+        TempOrdonnanceService.SetLignes(lignes);
+
+
+        Patients = await PatientServices.GetPatients(userId);
+        Pharmacies = await UserServices.GetPharmacies();
+
+        var p = Patients.FirstOrDefault(x => x.PatientID == Ordonnance.PatientID);
+        if (p != null) searchPatient = $"{p.CIN} {p.Nom} {p.Prenom}";
+
+        var ph = Pharmacies.FirstOrDefault(x => x.Id == Ordonnance.PharmacienID);
+        if (ph != null) searchPharmacie = ph.NomPharmacie;
+    }
+
+    void FilterPatients(ChangeEventArgs e) =>
+        filteredPatients = Patients
+            .Where(p => $"{p.CIN} {p.Nom} {p.Prenom}"
+            .Contains(e.Value?.ToString() ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
+
+    void FilterPharmacies(ChangeEventArgs e) =>
+        filteredPharmacies = Pharmacies
+            .Where(p => p.NomPharmacie?.Contains(e.Value?.ToString() ?? "", StringComparison.OrdinalIgnoreCase) == true).ToList();
+
+    void SelectPatient(Patient p)
+    {
+        Ordonnance.PatientID = p.PatientID;
+        searchPatient = $"{p.CIN} {p.Nom} {p.Prenom}";
+        filteredPatients.Clear();
+    }
+
+    void SelectPharmacie(UserDTO p)
+    {
+        Ordonnance.PharmacienID = p.Id;
+        searchPharmacie = p.NomPharmacie;
+        filteredPharmacies.Clear();
+    }
+
+    void OpenAddModal()
+    {
+        ligneToEdit = null;
+        showModal = true;
+    }
+
+    void EditLigne(LigneMedicament l)
+    {
+        ligneToEdit = l;
+        showModal = true;
+    }
+
+    void RemoveLigne(LigneMedicament l)
+    {
+        TempOrdonnanceService.RemoveLigne(l);
+    }
+
+    async Task CloseModal()
+    {
+        showModal = false;
+        ligneToEdit = null;
+    }
+
+    async Task OnLigneSaved(LigneMedicament l)
+    {
+        showModal = false;
+        ligneToEdit = null;
+    }
+
+    async Task HandleUpdate()
+    {
+        await OrdonnanceServices.UpdateOrdonnance(Ordonnance);
+
+        foreach (var l in TempOrdonnanceService.GetLignes())
+        {
+            l.ordID = Ordonnance.OrdID;
+
+            if (l.ligneID == 0)
+            {
+                await LigneMedicamentServices.CreateLigneMedicament(l);
+                await MedicamentServices.DiminuerStock(l.MedicamentID, l.qtePrescrite);
+            }
+            else
+            {
+                await LigneMedicamentServices.UpdateLigneMedicament(l);
+            }
+        }
+
+        TempOrdonnanceService.Clear();
+        Navigation.NavigateTo("/Ordonnances/ListOrdonnances");
+    }
+
+    public void Dispose()
+    {
+        TempOrdonnanceService.Clear();
+    }
+
+    void Cancel() => Navigation.NavigateTo("/Ordonnances/ListOrdonnances");
 }

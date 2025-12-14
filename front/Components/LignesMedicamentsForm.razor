@@ -4,15 +4,13 @@
 @inject TempOrdonnanceService TempOrdonnanceService
 
 <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-    <!-- Header -->
     <div class="flex items-center justify-between border-b pb-2 mb-4">
         <h3 class="text-lg font-semibold text-[#50bfa2]">
-            @((IsEdit ? "Update" : "Create") + " a medicine")
+            @((IsEdit ? "Update" : "Add") + " medicine")
         </h3>
         <button type="button" @onclick="CloseModal" class="text-gray-400 hover:text-[#50bfa2]">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
             </svg>
         </button>
     </div>
@@ -23,7 +21,6 @@
 
         <div class="relative mb-3">
             <label class="block mb-1 text-sm font-normal text-gray-500">Medicine name</label>
-
             <InputText @bind-Value="searchMedicament" @oninput="FilterMedicaments" placeholder="Search a medicine"
                        class="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
             @if (filteredMedicaments.Any() && !string.IsNullOrWhiteSpace(searchMedicament))
@@ -39,34 +36,40 @@
                 </ul>
             }
         </div>
-    <div  class="mb-3">
+
+        <div class="mb-3">
             <label class="block mb-1 text-sm font-normal text-gray-500">Dosage</label>
-
-        <InputText @bind-Value="medicamentModel.Dosage" class="w-full border rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
-
+            <InputText @bind-Value="medicamentModel.Dosage"
+                       class="w-full border rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
         </div>
+
         <div class="mb-3">
             <label class="block mb-1 text-sm font-normal text-gray-500">Quantity</label>
-        <InputNumber @bind-Value="medicamentModel.Quantite" class="w-full border rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" min="0" />
+            <InputNumber @bind-Value="medicamentModel.Quantite"
+                         class="w-full border rounded p-2 focus:outline-none focus:ring-1 focus:ring-[#50bfa2] focus:border-[#50bfa2]" min="0" />
         </div>
+
         <div class="flex justify-end space-x-2">
-            <button type="button" class="bg-gray-300 hover:bg-gray-200 font-normal text-[#6f7885] px-4 py-2 border rounded text-sm" @onclick="CloseModal">Cancel</button>
-            <button type="submit" class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-4 py-2 border rounded text-sm font-medium">Save</button>
+            <button type="button" class="bg-gray-300 hover:bg-gray-200 font-normal text-[#6f7885] px-4 py-2 border rounded text-sm" @onclick="CloseModal">
+                Cancel
+            </button>
+            <button type="submit" class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-4 py-2 border rounded text-sm font-medium">
+                Save
+            </button>
         </div>
     </EditForm>
-        </div>
+</div>
 
 @code {
     [Parameter] public EventCallback<LigneMedicament> OnLigneSaved { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public Ordonnance ParentOrdonnance { get; set; }
-    [Parameter] public LigneMedicament Ligne { get; set; } // Si null => ajout, sinon édition
+    [Parameter] public LigneMedicament Ligne { get; set; }
 
     private MedicamentModel medicamentModel = new();
     private List<Medicament> allMedicaments = new();
     private List<Medicament> filteredMedicaments = new();
     private string searchMedicament = "";
-
     private bool IsEdit => Ligne != null;
 
     public class MedicamentModel
@@ -76,7 +79,7 @@
         public int Quantite { get; set; } = 0;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         await LoadMedicamentsByPharmacie();
 
@@ -86,12 +89,15 @@
             medicamentModel.Dosage = Ligne.dose;
             medicamentModel.Quantite = Ligne.qtePrescrite;
             searchMedicament = Ligne.Medicament?.Nom ?? "";
-
-            // Ne pas afficher la liste filtrée par défaut
-            filteredMedicaments = new List<Medicament>();
         }
-    }
+        else
+        {
+            medicamentModel = new MedicamentModel();
+            searchMedicament = "";
+        }
 
+        filteredMedicaments = new List<Medicament>();
+    }
 
     private async Task LoadMedicamentsByPharmacie()
     {
@@ -99,8 +105,6 @@
         if (pharmaID != Guid.Empty)
         {
             allMedicaments = await MedicamentServices.GetMedicaments(pharmaID);
-            filteredMedicaments = allMedicaments;
-            StateHasChanged();
         }
     }
 
@@ -108,14 +112,15 @@
     {
         medicamentModel.Id = med.MedicamentID;
         searchMedicament = med.Nom;
-        filteredMedicaments = new List<Medicament>();
+        filteredMedicaments.Clear();
     }
 
     private void FilterMedicaments(ChangeEventArgs e)
     {
         searchMedicament = e.Value?.ToString() ?? "";
-        filteredMedicaments = string.IsNullOrWhiteSpace(searchMedicament) ? allMedicaments :
-            allMedicaments.FindAll(m => m.Nom.Contains(searchMedicament, StringComparison.OrdinalIgnoreCase));
+        filteredMedicaments = string.IsNullOrWhiteSpace(searchMedicament)
+            ? new List<Medicament>()
+            : allMedicaments.FindAll(m => m.Nom.Contains(searchMedicament, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task HandleLigneSubmit()
@@ -145,6 +150,7 @@
             Ligne.dose = medicamentModel.Dosage;
             Ligne.qtePrescrite = medicamentModel.Quantite;
             Ligne.Medicament = new Medicament { MedicamentID = medicament.MedicamentID, Nom = medicament.Nom };
+            TempOrdonnanceService.UpdateLigne(Ligne);
         }
         else
         {

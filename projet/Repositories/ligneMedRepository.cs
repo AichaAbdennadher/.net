@@ -25,15 +25,60 @@ namespace projet.Repositories
             await context.SaveChangesAsync();
             return LigneMedicament;
         }
+        public async Task<bool> UpdateLigneMedicament(LigneMedicament ligneMedicament)
+        {
+            // Récupérer la ligne de médicament dans la table "lignesMedicaments"
+            var existing = await context.lignesMedicaments
+                .Include(l => l.Medicament) // si tu veux accéder aux infos du médicament
+                .FirstOrDefaultAsync(l => l.ligneID == ligneMedicament.ligneID);
+
+            if (existing == null)
+                return false;
+
+            if (existing.Medicament == null)
+                return false;
+
+            // Calculer la différence de quantité prescrite
+            int diffQte = ligneMedicament.qtePrescrite - existing.qtePrescrite;
+
+            // Vérifier si le stock est suffisant pour la modification
+            if (diffQte > 0 && existing.Medicament.Stock < diffQte)
+                return false; // Stock insuffisant
+
+            // Mettre à jour le stock du médicament
+            existing.Medicament.Stock -= diffQte;
+            // Mettre à jour les champs
+            existing.MedicamentID = ligneMedicament.MedicamentID;
+            existing.dose = ligneMedicament.dose;
+            existing.qtePrescrite = ligneMedicament.qtePrescrite;
+            existing.qteDelivre = ligneMedicament.qteDelivre;
+            existing.dateDelivre = ligneMedicament.dateDelivre;
+            existing.statut = ligneMedicament.statut;
+
+            await context.SaveChangesAsync();
+            return true;
+        }
 
 
         public async Task<List<LigneMedicament>> GetLignesByOrdonnance(int ordID)
         {
             return await context.lignesMedicaments
-                .Include(l => l.Medicament) // pour pouvoir accéder à ligne.Medicament.Nom
                 .Where(l => l.ordID == ordID)
+                .Select(l => new LigneMedicament
+                {
+                    ligneID = l.ligneID,
+                    ordID = l.ordID,
+                    MedicamentID = l.MedicamentID,
+                    dose = l.dose,
+                    qtePrescrite = l.qtePrescrite,
+                    qteDelivre = l.qteDelivre,
+                    dateDelivre = l.dateDelivre,
+                    statut = l.statut,
+                    Medicament = l.Medicament != null ? new Medicament { Nom = l.Medicament.Nom, MedicamentID = l.Medicament.MedicamentID } : null
+                })
                 .ToListAsync();
         }
+
         public async Task<List<LigneMedicament>> GetLignesMedicamentPharmacien(Guid pharmacienId)
         {
             return await context.lignesMedicaments

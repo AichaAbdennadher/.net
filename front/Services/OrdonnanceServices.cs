@@ -50,7 +50,7 @@ namespace front.Services
         public async Task<bool> UpdateOrdonnance(Ordonnance Ordonnance)
         {
             await AddJwtHeaderAsync();
-            var response = await _httpClient.PutAsJsonAsync("api/Ordonnance", Ordonnance);
+            var response = await _httpClient.PutAsJsonAsync("api/Ordonnance/update", Ordonnance);
             return response.IsSuccessStatusCode;
         }
 
