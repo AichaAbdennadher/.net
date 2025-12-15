@@ -78,7 +78,7 @@
 
                                     <!-- Send -->
                                     <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
-                                          @onclick="() => Send(ord.OrdID)">
+                                          @onclick="() => Send(ord)">
                                         <i class='bx bx-mail-send text-[#50bfa2] text-2xl'></i>
                                     </span>
 
@@ -133,8 +133,21 @@
         currentPage = 1;
     }
 
+    private async Task Send(Ordonnance ord)
+    {
+        bool result = await OrdonnanceServices.SendOrdonnance(ord);
+
+        if (result)
+        {
+            await JS.InvokeVoidAsync("showToastr", "success", "Prescription sent successfully");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("showToastr", "error", "The prescription was not sent");
+        }
+    }
+
     private void Edit(int id) => Navigation.NavigateTo($"/Ordonnances/Edit/{id}");
     private void Delete(int id) => Navigation.NavigateTo($"/Ordonnances/Delete/{id}");
-    private void Send(int id) => Navigation.NavigateTo($"/Ordonnances/Send/{id}");
     private void CreerOrdonnance() => Navigation.NavigateTo("/Ordonnances/Create");
 }

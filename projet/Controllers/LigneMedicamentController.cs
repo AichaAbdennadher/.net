@@ -19,15 +19,11 @@ namespace projet.Controllers
 
         [HttpPost]
         public async Task<IActionResult> CreateLigneMedicament(LigneMedicament ligneMedicament)
-        {
-            //List<LigneMedicament> LigneMedicaments = await repository.GetLignesBy(LigneMedicament.Medicament.Nom);
-            //if (LigneMedicaments.Any(d => d.Medicament.Nom == LigneMedicament.Medicament.Nom))
-            //{
-            //    return BadRequest("LigneMedicament existe!!");
-            //}
+        { 
             LigneMedicament newLigneMedicament = await repository.CreateLigneMedicament(ligneMedicament);
             return CreatedAtAction(nameof(GetlMedByID), new { id = newLigneMedicament.ligneID }, newLigneMedicament);
         }
+
         [HttpPut]
         public async Task<IActionResult> updateLigneMedicament(LigneMedicament ligneMedicament)
         {
@@ -35,16 +31,43 @@ namespace projet.Controllers
             if (result) return NoContent();
             return BadRequest("erreur update");
         }
-
-
-        [HttpGet]
-        public async Task<IActionResult> GetligMeds(Guid id)
+        [HttpPut("delivrer")]
+        public async Task<IActionResult> DelivrerLigneMedicament(LigneMedicament ligneMedicament)
         {
-            var ligMeds = await repository.GetLignesMedicamentPharmacien(id);
-            return Ok(ligMeds);
+            var result = await repository.DelivrerLigneMedicament(ligneMedicament);
+
+            if (!result)
+                return BadRequest("Erreur : La ligne n'a pas pu être délivrée.");
+
+            return Ok("La ligne a été délivrée avec succès.");
         }
 
-    
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> deleteLigneMedicament(int id)
+        {
+            var result = await repository.DeleteLigneMedicament(id);
+            if (result) return NoContent();
+            return NotFound("supp impoosible");
+        }
+
+        [HttpGet("ph/{userId}")]
+        public async Task<IActionResult> GetligMeds(Guid userId)
+        {
+            try
+            {
+                var ligMeds = await repository.GetLignesMedicamentPharmacien(userId);
+                return Ok(ligMeds);
+            }
+            catch (Exception ex)
+            {
+                // Log l'erreur
+                Console.WriteLine(ex);
+                return StatusCode(500, $"Erreur serveur : {ex.Message}");
+            }
+        }
+
+
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetlMedByID(int id)
         {
@@ -62,15 +85,6 @@ namespace projet.Controllers
             return Ok(lignes);
         }
 
-        //[HttpPut("delivrer/{ligneId}")]
-        //public async Task<IActionResult> DelivrerLigneMedicament(int ligneId)
-        //{
-        //    var result = await repository.DelivrerLigneMedicament(ligneId);
-
-        //    if (!result)
-        //        return BadRequest("Erreur : La ligne n'a pas pu être délivrée.");
-
-        //    return Ok("La ligne a été délivrée avec succès.");
-        //}
+  
     }
 }

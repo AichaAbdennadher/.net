@@ -1,4 +1,5 @@
 ﻿using metiers;
+using System.Threading.Tasks;
 
 namespace projet.Repositories
 {
@@ -8,12 +9,10 @@ namespace projet.Repositories
         Task<List<LigneMedicament>> GetLignesByOrdonnance(int ordID);
 
         Task<LigneMedicament> GetligneMedicament(int id); //pour pop up de qte delivrée
-
-        // Task<bool> DelivrerLigneMedicament(int ligneId);
-
         Task<LigneMedicament> CreateLigneMedicament(LigneMedicament LigneMedicament);
         Task<bool> UpdateLigneMedicament(LigneMedicament LigneMedicament);
-
+        Task<bool> DeleteLigneMedicament(int id);
+        Task<bool> DelivrerLigneMedicament(LigneMedicament ligneMedicament);
     }
   
     }

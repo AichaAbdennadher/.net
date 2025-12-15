@@ -138,11 +138,11 @@
             return;
         }
 
-        if (medicament.Stock < medicamentModel.Quantite)
-        {
-            await JS.InvokeVoidAsync("showToastr", "error", $"Stock insuffisant! Disponible : {medicament.Stock}");
-            return;
-        }
+        // if (medicament.Stock < medicamentModel.Quantite)
+        // {
+        //     await JS.InvokeVoidAsync("showToastr", "error", $"Stock insuffisant! Disponible : {medicament.Stock}");
+        //     return;
+        // }
 
         if (IsEdit)
         {

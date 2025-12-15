@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using projet.Data;
 using System;
+using System.Reflection.Metadata.Ecma335;
 
 namespace projet.Repositories
 {
@@ -39,14 +40,14 @@ namespace projet.Repositories
                 return false;
 
             // Calculer la différence de quantité prescrite
-            int diffQte = ligneMedicament.qtePrescrite - existing.qtePrescrite;
+            //int diffQte = ligneMedicament.qtePrescrite - existing.qtePrescrite;
 
             // Vérifier si le stock est suffisant pour la modification
-            if (diffQte > 0 && existing.Medicament.Stock < diffQte)
-                return false; // Stock insuffisant
+           // if (diffQte > 0 && existing.Medicament.Stock < diffQte)
+           //     return false; // Stock insuffisant
 
             // Mettre à jour le stock du médicament
-            existing.Medicament.Stock -= diffQte;
+         //   existing.Medicament.Stock -= diffQte;
             // Mettre à jour les champs
             existing.MedicamentID = ligneMedicament.MedicamentID;
             existing.dose = ligneMedicament.dose;
@@ -57,6 +58,63 @@ namespace projet.Repositories
 
             await context.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> DelivrerLigneMedicament(LigneMedicament model)
+        {
+            var existing = await context.lignesMedicaments
+                .Include(l => l.Medicament)
+                .FirstOrDefaultAsync(l => l.ligneID == model.ligneID);
+
+            if (existing == null || existing.Medicament == null)
+                return false;
+
+            int qteDemandee = model.qteDelivre ?? 0;
+
+            // Sécurités
+            if (qteDemandee <= 0)
+                return false;
+
+            int dejaDelivre = existing.qteDelivre ?? 0;
+            int restante = existing.qtePrescrite - dejaDelivre;
+
+            if (qteDemandee > restante)
+                return false;
+
+            if (existing.Medicament.Stock < qteDemandee)
+                return false;
+
+            // ✅ Mise à jour correcte
+            existing.qteDelivre = dejaDelivre + qteDemandee;
+            existing.Medicament.Stock -= qteDemandee;
+            existing.dateDelivre = DateTime.Now;
+
+            // ✅ Statut
+            if (existing.qteDelivre == existing.qtePrescrite)
+                existing.statut = Statut.Delivree;
+            else
+                existing.statut = Statut.PartiellementDelivree;
+
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+
+        public async Task<bool> DeleteLigneMedicament(int id)
+        {
+            var ligne = await context.lignesMedicaments
+                .Include(l => l.Medicament)
+                .FirstOrDefaultAsync(l => l.ligneID == id);
+
+            if (ligne == null)
+                return false; // ligne non trouvée
+
+            // Restaurer le stock
+         //   ligne.Medicament.Stock += ligne.qtePrescrite;
+
+            context.lignesMedicaments.Remove(ligne);
+            await context.SaveChangesAsync();
+
+            return true; // suppression réussie
         }
 
 
@@ -82,8 +140,8 @@ namespace projet.Repositories
         public async Task<List<LigneMedicament>> GetLignesMedicamentPharmacien(Guid pharmacienId)
         {
             return await context.lignesMedicaments
-                               // .Include(lm => lm.Medicament) // Inclut le médicament pour accéder à son UserID et stock
-                               // .Where(lm => lm.Medicament.UserID == pharmacienId)
+                                .Include(lm => lm.Medicament) // Inclut le médicament pour accéder à son UserID et stock
+                                .Where(lm => lm.Medicament.UserID == pharmacienId)
                                 .ToListAsync();
         }
 
@@ -92,47 +150,7 @@ namespace projet.Repositories
             return await context.lignesMedicaments.FindAsync(id);
         }
 
-        //public async Task<bool> DelivrerLigneMedicament(int ligneId)
-        //{
-        //    var ligne = await context.lignesMedicaments
-        //                            .Include(l => l.Medicament)
-        //                             .FirstOrDefaultAsync(l => l.ligneID == ligneId);
-
-        //    if (ligne == null || ligne.Medicament == null)
-        //        return false;
-
-        //    int stock = ligne.Medicament.Stock;
-        //    int qteDemandee = ligne.qtePrescrite;
-        //    int qteDejaDelivree = ligne.qteDelivre;
-
-        //    int qteRestante = qteDemandee - qteDejaDelivree;
-
-        //    if (qteRestante <= 0)
-        //        return false; // Déjà totalement délivrée
-
-        //    // Quantité à délivrer selon le stock
-        //    int qteAjustee = Math.Min(stock, qteRestante);
-
-        //    // Mise à jour de la quantité délivrée
-        //    ligne.qteDelivre += qteAjustee;
-
-        //    // Mise à jour du stock du médicament
-        //    ligne.Medicament.Stock -= qteAjustee;
-
-        //    // Mise à jour du statut
-        //    if (ligne.qteDelivre == ligne.qtePrescrite)
-        //        ligne.statut = Statut.Delivree;
-        //    else if (ligne.qteDelivre > 0 && ligne.qteDelivre < ligne.qtePrescrite)
-        //        ligne.statut = Statut.PartiellementDelivree;
-        //    else
-        //        ligne.statut = Statut.EnAttente;
-
-        //    // Date délivrance
-        //    ligne.dateDelivre = DateTime.Now;
-
-        //    await context.SaveChangesAsync();
-        //    return true;
-        //}
+       
 
     }
 }

@@ -11,7 +11,7 @@ namespace projet.Repositories
      
         Task<bool> DeleteOrdonnance(int id);
 
-        Task<bool> UpdateOrdonnance(Ordonnance Ordonnance); /////
+        Task<bool> UpdateOrdonnance(Ordonnance Ordonnance); 
 
         //envoyer ordanance en cas accpation de Ordonnance (envoyé=true)
         Task<bool> EnvoyerOrdonnance(Ordonnance Ordonnance);

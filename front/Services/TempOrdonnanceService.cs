@@ -12,6 +12,7 @@ namespace front.Services
 
         // Lignes de médicaments temporaires
         private List<LigneMedicament> _tempLignes = new List<LigneMedicament>();
+
         public List<LigneMedicament> TempLignes => _tempLignes;
 
         // Pharmacie temporaire sélectionnée
@@ -20,15 +21,23 @@ namespace front.Services
         // Ajouter une ligne
         public void AddLigne(LigneMedicament ligne)
         {
-            // Vérifier si la ligne existe déjà (même médicament)
-            var existing = _tempLignes.FirstOrDefault(l => l.ligneID == ligne.ligneID);
-            if (existing == null)
+            if (ligne.ligneID == 0)
             {
+                // Always add new lines
                 _tempLignes.Add(ligne);
             }
             else
             {
-                UpdateLigne(ligne);
+                // Update existing saved lines
+                var existing = _tempLignes.FirstOrDefault(l => l.ligneID == ligne.ligneID);
+                if (existing != null)
+                {
+                    UpdateLigne(ligne);
+                }
+                else
+                {
+                    _tempLignes.Add(ligne);
+                }
             }
         }
 

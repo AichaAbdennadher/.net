@@ -54,6 +54,12 @@ namespace front.Services
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<bool> SendOrdonnance(Ordonnance Ordonnance)
+        {
+            await AddJwtHeaderAsync();
+            var response = await _httpClient.PutAsJsonAsync("api/Ordonnance/envoyer", Ordonnance);
+            return response.IsSuccessStatusCode;
+        }
         public async Task<bool> DeleteOrdonnance(int id)
         {
             await AddJwtHeaderAsync();

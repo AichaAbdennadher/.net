@@ -55,7 +55,7 @@ namespace front.Services
             await AddJwtHeaderAsync();
             return await _httpClient.GetFromJsonAsync<Medicament>($"api/Medicament/{id}");
         }
-
+      
         public async Task<Medicament> CreateMedicament(Medicament Medicament)
         {
             await AddJwtHeaderAsync();
@@ -78,10 +78,7 @@ namespace front.Services
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<Medicament> GetMedicamentAsync(int id)
-        {
-            return await _httpClient.GetFromJsonAsync<Medicament>($"api/Medicament/{id}");
-        }
+     
 
         //public async Task<List<Medicament>> GetTousMedicaments()
         //{

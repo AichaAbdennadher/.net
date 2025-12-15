@@ -42,6 +42,12 @@ namespace front.Services
             var response = await _httpClient.PutAsJsonAsync("api/LigneMedicament", LigneMedicament);
             return response.IsSuccessStatusCode;
         }
+        public async Task<bool> DelivrerLigneMedicament(LigneMedicament LigneMedicament)
+        {
+            await AddJwtHeaderAsync();
+            var response = await _httpClient.PutAsJsonAsync("api/LigneMedicament/delivrer", LigneMedicament);
+            return response.IsSuccessStatusCode;
+        }
 
         public async Task<bool> DeleteLigneMedicament(int id)
         {
@@ -56,10 +62,10 @@ namespace front.Services
             return await _httpClient.GetFromJsonAsync<List<LigneMedicament>>($"api/LigneMedicament/byOrdonnance/{ordID}");
         }
 
-        public async Task<List<LigneMedicament>> GetLigneMedicaments(string userId)
+        public async Task<List<LigneMedicament>> GetLigneMedicaments(Guid userId)/////
         {
             await AddJwtHeaderAsync();
-            return await _httpClient.GetFromJsonAsync<List<LigneMedicament>>($"api/LigneMedicament/LigneMedicaments/ph/{userId}");
+            return await _httpClient.GetFromJsonAsync<List<LigneMedicament>>($"api/LigneMedicament/ph/{userId}");
         }
 
         public async Task<LigneMedicament> GetLigneMedicament(int id)

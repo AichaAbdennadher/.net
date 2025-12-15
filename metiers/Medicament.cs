@@ -1,6 +1,7 @@
 ﻿using metiers;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace metiers
 {
@@ -21,6 +22,7 @@ namespace metiers
         public int Stock { get; set; }
 
         public Guid UserID { get; set; }
+        [JsonIgnore]
         public ICollection<LigneMedicament> LigneMedicaments { get; set; } = new List<LigneMedicament>();
 
     }

@@ -50,14 +50,50 @@ namespace projet.Repositories
             return true;
         }
 
-        public Task<bool> DeleteOrdonnance(int id)
+        public async Task<bool> DeleteOrdonnance(int id)
         {
-            throw new NotImplementedException();
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Charger l'ordonnance
+                var ordonnance = await context.ordonnances.FindAsync(id);
+                if (ordonnance == null)
+                    return false;
+
+                // Charger les lignes liées
+                var lignes = await context.lignesMedicaments
+                    .Include(l => l.Medicament)
+                    .Where(l => l.ordID == id)
+                    .ToListAsync();
+
+                // Restaurer le stock
+                //foreach (var ligne in lignes)
+                //{
+                //    ligne.Medicament.Stock += ligne.qtePrescrite;
+                //}
+
+                // Supprimer les lignes
+                context.lignesMedicaments.RemoveRange(lignes);
+
+                // Supprimer l'ordonnance
+                context.ordonnances.Remove(ordonnance);
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
-        public async Task<bool> EnvoyerOrdonnance(Ordonnance Ordonnance)
+        public async Task<bool> EnvoyerOrdonnance(Ordonnance ordonnance)
         {
-            var dep = await context.ordonnances.FindAsync(Ordonnance.OrdID);
+            var dep = await context.ordonnances.FindAsync(ordonnance.OrdID);
             if (dep == null)
                 return false;
             dep.envoyee = true;

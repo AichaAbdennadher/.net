@@ -73,7 +73,7 @@
     protected override async Task OnInitializedAsync()
     {
         // Charger le Medicament existant
-        var existing = await MedicamentServices.GetMedicamentAsync(id);
+        var existing = await MedicamentServices.GetMedicament(id);
 
         if (existing != null)
         {
