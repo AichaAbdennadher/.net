@@ -1,9 +1,9 @@
 ﻿using Blazored.LocalStorage;
 using metiers;
+using metiers.shared;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-
 namespace front.Services
 {
     public class OrdonnanceServices
@@ -33,6 +33,16 @@ namespace front.Services
             return await _httpClient.GetFromJsonAsync<List<Ordonnance>>($"api/Ordonnance/medecin/{medecinId}");
         }
 
+        public async Task<List<Ordonnance>> GetOrdonnancesEnvoyes(string PharmacienID)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<List<Ordonnance>>($"api/Ordonnance/pharmacy/{PharmacienID}");
+        }
+        public async Task<List<LigneMedicament>> DelivrerOrdonnance(int ordId)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<List<LigneMedicament>>($"api/Ordonnance/delivree/{ordId}");
+        }
         public async Task<Ordonnance> GetOrdonnance(int id)
         {
             await AddJwtHeaderAsync();
@@ -66,6 +76,48 @@ namespace front.Services
             var response = await _httpClient.DeleteAsync($"api/Ordonnance/{id}");
             return response.IsSuccessStatusCode;
         }
+        public async Task<int> GetNbreOrdonnances(string pharmacienId)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<int>(
+                $"api/Ordonnance/pharmacy/nbreOrd/{pharmacienId}"
+            );
+        }
+        public async Task<int> GetNbreOrdonnancesLivrees(string pharmacienId)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<int>(
+                $"api/Ordonnance/pharmacy/nbreOrdLivree/{pharmacienId}"
+            );
+        }
+        public async Task<int> GetNbreOrdonnancesNonLivrees(string pharmacienId)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<int>(
+                $"api/Ordonnance/pharmacy/nbreOrdNonLivree/{pharmacienId}"
+            );
+        }
+        public async Task<int> GetNbreDoctors(string pharmacienId)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<int>(
+                $"api/Ordonnance/pharmacy/nbreDoctors/{pharmacienId}"
+            );
+        }
+        public async Task<List<Ordonnance>> GetDernieresOrdonnancesPharmacien(string pharmacienId)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<List<Ordonnance>>($"api/Ordonnance/pharmacien/dernieres/{pharmacienId}");
+        }
+        public async Task<List<OrdonnanceParMoisDTO>> GetOrdonnancesParMoisPharmacien(
+    string pharmacienId, int annee)
+        {
+            await AddJwtHeaderAsync();
+            return await _httpClient.GetFromJsonAsync<List<OrdonnanceParMoisDTO>>(
+                $"api/Ordonnance/pharmacien/{pharmacienId}/statistiques/mois/{annee}"
+            );
+        }
+
 
     }
 }

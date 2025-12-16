@@ -1,7 +1,7 @@
 ﻿@page "/Ordonnances/ListOrdonnancesRecus"
 @using metiers
 @inject NavigationManager Navigation
-@inject LigneMedicamentServices LigneMedicamentServices
+@inject OrdonnanceServices OrdonnanceServices
 @inject IJSRuntime JS
 
 <HeaderPh />
@@ -13,9 +13,10 @@
             <!-- Header -->
             <div class="flex flex-col md:flex-row items-center justify-between p-4 bg-white gap-4">
 
-                <!-- Search par nom -->
+                <!-- Search par patient -->
                 <div class="w-full md:w-1/2 relative">
-                    <input type="text" @bind="SearchText"
+                    <input type="text"
+                           @bind="SearchText"
                            placeholder="Search"
                            class="w-full bg-white border border-gray-300 text-gray-700 text-sm rounded-xl pl-11 py-2.5 shadow-sm"
                            @oninput="OnSearchChanged" />
@@ -32,95 +33,115 @@
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                         <tr>
                             <th class="px-4 py-3">Number</th>
-                            <th class="px-4 py-3">Name</th>
-                            <th class="px-4 py-3">Stock</th>
-                            <th class="px-4 py-3">Prescribed quantity</th>
-                            <th class="px-4 py-3" colspan="2">Action</th>
+                            <th class="px-4 py-3">Patient</th>
+                            <th class="px-4 py-3">Creation date</th>
+                            <th class="px-4 py-3">Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        @foreach (var LigneMedicament in PagedLigneMedicaments)
+                        @foreach (var ord in PagedOrdonnances)
                         {
                             <tr class="border-b">
-                                <td class="px-4 py-3">@LigneMedicament.ligneID</td>
-                                <td class="px-4 py-3">@LigneMedicament.Medicament.Nom</td>
-                                <td class="px-4 py-3">@LigneMedicament.Medicament.Stock</td>
-                                <td class="px-4 py-3">@LigneMedicament.qtePrescrite</td>
+                                <td class="px-4 py-3">@ord.OrdID</td>
+                                <td class="px-4 py-3">@($"{ord.Patient.Nom} {ord.Patient.Prenom}")</td>
+                                <td class="px-4 py-3">@ord.DateCreation.ToString("dd/MM/yyyy")</td>
 
+                                <td class="px-4 py-3 flex items-center space-x-3">
 
-                                <td class="px-4 py-3 flex space-x-2">
-                                    <span class="cursor-pointer px-2 py-1 rounded
-                    @(LigneMedicament.statut == Statut.Delivree || LigneMedicament.Medicament.Stock == 0
-                                                                                                                                          ? "bg-gray-200 cursor-not-allowed text-gray-400"
-                                                                                                                                          : "bg-[#50bfa2] hover:bg-[#95dbc8] text-white")"
-                                          @onclick="@(LigneMedicament.statut == Statut.Delivree || LigneMedicament.Medicament.Stock == 0 ? null : () => Delivree(LigneMedicament.ligneID))">
-                                        <i class='bx bx-cycling text-2xl'></i>
+                                    <!-- Voir ordonnance -->
+                                    <span class="cursor-pointer p-2 rounded hover:bg-gray-100"
+                                          title="Voir l’ordonnance"
+                                          @onclick="() => Voir(ord.OrdID)">
+                                        <i class="fa-regular fa-eye text-gray-500 text-xl"></i>
                                     </span>
-                                </td>
 
+                                    <!-- Délivrer ordonnance -->
+                                    <span class="p-2 rounded flex items-center justify-center
+                                              @(ord.Statut == Statut.Delivree
+                                                                                      ? "bg-gray-200 cursor-not-allowed text-gray-400"
+                                                                                      : "bg-[#50bfa2] hover:bg-[#95dbc8] text-white")"
+                                          title="@(ord.Statut == Statut.Delivree
+                                                                                      ? "Ordonnance déjà délivrée"
+                                                                                      : "Délivrer l’ordonnance")"
+                                      @onclick="@(ord.Statut == Statut.Delivree
+                                                                                  ? null
+                                                                                  : () => Delivrer(ord.OrdID))">
+                                    <i class="bx bx-cycling text-2xl"></i>
+                                </span>
 
-                            </tr>
-                        }
+                            </td>
+                        </tr>
+                                                }
                     </tbody>
                 </table>
             </div>
-            <Pagination TotalPages="@totalPages" CurrentPage="@currentPage" OnPageChange="LoadLigneMedicaments" />
 
+            <Pagination TotalPages="@totalPages"
+                        CurrentPage="@currentPage"
+                        OnPageChange="LoadOrdonnances" />
         </div>
     </div>
 </section>
 
 @code {
-    private List<LigneMedicament> LigneMedicaments = new();
+
+    private List<Ordonnance> Ordonnances = new();
     private string SearchText = "";
 
     private int currentPage = 1;
-    private int pageSize = 5; // nombre d'éléments par page
-    private int totalPages => (int)Math.Ceiling((double)FilteredLigneMedicaments.Count() / pageSize);
+    private int pageSize = 5;
 
-    private IEnumerable<LigneMedicament> FilteredLigneMedicaments =>
+    private int totalPages =>
+        (int)Math.Ceiling((double)FilteredOrdonnances.Count() / pageSize);
+
+    private IEnumerable<Ordonnance> FilteredOrdonnances =>
         string.IsNullOrWhiteSpace(SearchText)
-            ? LigneMedicaments
-            : LigneMedicaments.Where(p =>
-                p.Medicament.Nom.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+            ? Ordonnances
+            : Ordonnances.Where(o =>
+                o.Patient.Nom.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+                o.Patient.Prenom.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
 
-    private IEnumerable<LigneMedicament> PagedLigneMedicaments =>
-        FilteredLigneMedicaments.Skip((currentPage - 1) * pageSize).Take(pageSize);
+    private IEnumerable<Ordonnance> PagedOrdonnances =>
+        FilteredOrdonnances
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize);
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadLigneMedicaments(currentPage);
+        await LoadOrdonnances(currentPage);
     }
 
-    private async Task LoadLigneMedicaments(int page)
+    private async Task LoadOrdonnances(int page)
     {
         currentPage = page;
 
-        // Récupérer l'ID depuis le localStorage
-        string medecinIdString = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
-        medecinIdString = medecinIdString?.Trim('"');
+        string pharmacienId = await JS.InvokeAsync<string>("localStorage.getItem", "userId");
+        pharmacienId = pharmacienId?.Trim('"');
 
-        // Convertir en Guid
-        if (!Guid.TryParse(medecinIdString, out Guid medecinId))
-        {
-            // Gestion d'erreur si le guid n'est pas valide
-            await JS.InvokeVoidAsync("showNotification", "ID médecin invalide !", "error");
-            return;
-        }
-
-        // Passer le Guid au service
-        LigneMedicaments = await LigneMedicamentServices.GetLigneMedicaments(medecinId);
-
-        StateHasChanged();
+        Ordonnances = await OrdonnanceServices.GetOrdonnancesEnvoyes(pharmacienId);
     }
 
     private void OnSearchChanged(ChangeEventArgs e)
     {
-        currentPage = 1; // reset page à 1 après modification du filtre
+        currentPage = 1;
     }
 
-    private void Delivree(int id) => Navigation.NavigateTo($"/LigneMedicaments/Delivree/{id}");
+    private async Task Delivrer(int ordId)
+    {
+        var lignesNonDelivrees = await OrdonnanceServices.DelivrerOrdonnance(ordId);
+
+        if (lignesNonDelivrees.Count == 0)
+        {
+            await JS.InvokeVoidAsync("showToastr", "success", "Ordonnance totalement délivrée");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("showToastr", "warning", "Certaines lignes ne sont pas délivrées");
+            Navigation.NavigateTo($"/Ordonnances/OrdonnanceDelivree/{ordId}");
+        }
+    }
+
+    private void Voir(int id)
+        => Navigation.NavigateTo($"/Ordonnance/AffichageOrdonnance/{id}");
 }
-
-

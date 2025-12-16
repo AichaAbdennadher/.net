@@ -1,0 +1,145 @@
+﻿@page "/Ordonnances/OrdonnanceDelivree/{OrdId:int}"
+@using metiers
+@inject NavigationManager Navigation
+@inject OrdonnanceServices OrdonnanceServices
+@inject LigneMedicamentServices LigneMedicamentServices
+@inject IJSRuntime JS
+
+<h3 class="text-lg font-semibold text-[#50bfa2] mb-4">
+    Livraison Ordonnance
+</h3>
+
+@if (IsLoading)
+{
+    <div class="text-gray-500">Chargement...</div>
+}
+else
+{
+    <!-- Infos ordonnance -->
+    <div class="mb-4 space-y-1">
+        <p><strong>Patient :</strong> @Ordonnance.Patient?.Nom</p>
+        <p><strong>Date :</strong> @Ordonnance.DateCreation.ToString("dd/MM/yyyy")</p>
+        <p><strong>Statut :</strong> @Ordonnance.Statut</p>
+    </div>
+
+    @if (LignesNonDelivrees.Count == 0)
+    {
+        <div class="text-green-600 font-semibold">
+            Toutes les lignes ont été délivrées.
+        </div>
+    }
+    else
+    {
+        <table class="table-auto w-full border rounded">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2">Médicament</th>
+                    <th class="px-4 py-2">Prescrit</th>
+                    <th class="px-4 py-2">Déjà délivré</th>
+                    <th class="px-4 py-2">Reste</th>
+                    <th class="px-4 py-2">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var ligne in LignesNonDelivrees)
+                {
+                    int reste = ligne.qtePrescrite - (ligne.qteDelivre ?? 0);
+
+                    <tr class="border-b">
+                        <td class="px-4 py-2">@ligne.Medicament?.Nom</td>
+                        <td class="px-4 py-2">@ligne.qtePrescrite</td>
+                        <td class="px-4 py-2">@ligne.qteDelivre ?? 0</td>
+                        <td class="px-4 py-2">@reste</td>
+
+                        <td class="px-4 py-2">
+                            <span class="cursor-pointer px-3 py-1 rounded
+                                         text-white bg-[#50bfa2]
+                                         hover:bg-[#95dbc8]"
+                                  @onclick="() => OpenModal(ligne)">
+                                Délivrer
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+<!-- Retour -->
+<div class="mt-4">
+    <span class="cursor-pointer px-4 py-2 rounded bg-gray-300 hover:bg-gray-200"
+          @onclick="Back">
+        Retour
+    </span>
+</div>
+
+<!-- Modal -->
+<DelivrerLigneMedicamentModal
+    LigneMedicament="SelectedLigne"
+    IsVisible="ShowModal"
+    OnClose="CloseModal"
+    OnSaved="ReloadData" />
+
+@code {
+    [Parameter] public int OrdId { get; set; }
+
+    private Ordonnance Ordonnance { get; set; } = new();
+    private List<LigneMedicament> LignesNonDelivrees { get; set; } = new();
+    private LigneMedicament SelectedLigne;
+    private bool ShowModal = false;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Ordonnance = await OrdonnanceServices.GetOrdonnance(OrdId);
+
+        if (Ordonnance == null)
+        {
+            await JS.InvokeVoidAsync("showToastr", "error", "Ordonnance introuvable");
+            return;
+        }
+
+        await LoadData();
+        IsLoading = false;
+    }
+
+    private async Task LoadData()
+    {
+        LignesNonDelivrees = await OrdonnanceServices.DelivrerOrdonnance(OrdId);
+    }
+
+    private void OpenModal(LigneMedicament ligne)
+    {
+        SelectedLigne = ligne;
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+    }
+
+    private async Task ReloadData()
+    {
+        ShowModal = false;
+        await LoadData();
+
+        if (LignesNonDelivrees.Count == 0)
+        {
+            Ordonnance.Statut = Statut.Delivree;
+            await OrdonnanceServices.UpdateOrdonnance(Ordonnance);
+
+            await JS.InvokeVoidAsync("showToastr", "success",
+                "Ordonnance totalement délivrée");
+        }
+
+        StateHasChanged();
+    }
+
+    private void Back()
+    {
+        Navigation.NavigateTo("/Ordonnances/ListOrdonnancesRecus");
+    }
+}

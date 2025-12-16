@@ -1,0 +1,178 @@
+﻿@page "/Dashboard/DashboardPharmacy"
+@inject OrdonnanceServices OrdonnanceService
+@using metiers
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<HeaderPh />
+<div style="background: linear-gradient(to right,#dae8d5, #dae8d5);" class="pb-8 pt-5 md:pt-8">
+
+    <div class="container mx-auto px-4">
+
+        <!-- Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white shadow rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h5 class="uppercase text-gray-500 text-sm">Doctors</h5>
+                    <span class="text-2xl font-bold">@Doctors</span>
+                </div>
+                <div class="bg-yellow-500 text-white w-14 h-14 flex items-center justify-center rounded-full">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white shadow rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h5 class="uppercase text-gray-500 text-sm">Prescriptions</h5>
+                    <span class="text-2xl font-bold">@PrescriptionsCount</span>
+                </div>
+                <div class="bg-[#d6672b] text-white w-14 h-14 flex items-center justify-center rounded-full">
+                    <i class="fas fa-clipboard-list text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white shadow rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h5 class="uppercase text-gray-500 text-sm">Prescriptions delivered</h5>
+                    <span class="text-2xl font-bold">@PrescriptionsLivreeCount</span>
+                </div>
+                <div class="bg-green-500 text-white w-14 h-14 flex items-center justify-center rounded-full">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white shadow rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <h5 class="uppercase text-gray-500 text-sm">Prescriptions not delivered</h5>
+                    <span class="text-2xl font-bold">@PrescriptionsNonLivreeCount</span>
+                </div>
+                <div class="bg-red-500 text-white w-14 h-14 flex items-center justify-center rounded-full">
+                    <i class="fas fa-times-circle text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="bg-white shadow rounded-2xl mb-8">
+            <div class="border-b px-4 py-3">
+                <span class="text-xl font-bold">Prescriptions per month</span>
+            </div>
+            <div class="p-4 h-[350px]">
+                <canvas @ref="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white shadow rounded-xl overflow-x-auto">
+            <div class="border-b px-4 py-3">
+                <span class="text-xl font-bold">Last Prescriptions </span>
+            </div>
+            <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 uppercase text-xs">
+                    <tr>
+                        <th class="px-4 py-3">Number</th>
+                        @* <th class="px-4 py-3">Doctor</th> *@
+                        <th class="px-4 py-3">Patient</th>
+                        <th class="px-4 py-3">Date</th>
+                        <th class="px-4 py-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ord in DernieresOrdonnances)
+                    {
+                        <tr class="border-b">
+                            <td class="px-4 py-3">@ord.OrdID</td>
+                            @* <td class="px-4 py-3">@ord.MedecinID</td> *@
+                            <td class="px-4 py-3">@ord.Patient?.Nom @ord.Patient?.Prenom</td>
+                            <td class="px-4 py-3">@ord.DateCreation.ToShortDateString()</td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-1 rounded text-white
+                                        @(ord.Statut == Statut.Delivree ? "bg-green-500" :@ord.Statut == Statut.PartiellementDelivree? "bg-green-300" :
+                                                                            ord.Statut == Statut.EnAttente ? "bg-yellow-500" :
+                                                                            "bg-red-500")">
+                                    @ord.Statut
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+    int Doctors;
+    int PrescriptionsCount;
+    int PrescriptionsLivreeCount;
+    int PrescriptionsNonLivreeCount;
+
+    List<Ordonnance> DernieresOrdonnances = new();
+    ElementReference salesChart;
+
+    string PharmacienId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboard();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await LoadChart();
+    }
+
+
+
+    async Task LoadDashboard()
+    {
+
+        string PharmacienId = (await JS.InvokeAsync<string>("localStorage.getItem", "userId"))?.Trim('"');
+        if (!Guid.TryParse(PharmacienId, out Guid phId))
+        {
+            await JS.InvokeVoidAsync("showNotification", "ID pharmacie invalide !", "error");
+            return;
+        }
+        Doctors = await OrdonnanceService.GetNbreDoctors(PharmacienId);
+        PrescriptionsCount = await OrdonnanceService.GetNbreOrdonnances(PharmacienId);
+        PrescriptionsLivreeCount = await OrdonnanceService.GetNbreOrdonnancesLivrees(PharmacienId);
+        PrescriptionsNonLivreeCount = await OrdonnanceService.GetNbreOrdonnancesNonLivrees(PharmacienId);
+        DernieresOrdonnances = await OrdonnanceService.GetDernieresOrdonnancesPharmacien(PharmacienId);
+
+
+    }
+
+    async Task LoadChart()
+    {
+        string PharmacienId = (await JS.InvokeAsync<string>("localStorage.getItem", "userId"))?.Trim('"');
+        if (!Guid.TryParse(PharmacienId, out Guid phId))
+        {
+            await JS.InvokeVoidAsync("showNotification", "ID pharmacie invalide !", "error");
+            return;
+        }
+        var data = await OrdonnanceService.GetOrdonnancesParMoisPharmacien(
+            PharmacienId, DateTime.Now.Year);
+
+        // Noms des mois
+        string[] months =
+        {
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+        // Initialiser avec 0
+        int[] values = new int[12];
+
+        // Remplir les mois existants
+        foreach (var item in data)
+        {
+            // item.mois supposé être entre 1 et 12
+            values[item.mois - 1] = item.nombre;
+        }
+
+        await JS.InvokeVoidAsync("drawChart", salesChart, months, values);
+    }
+}

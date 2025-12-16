@@ -1,0 +1,88 @@
+﻿@using metiers
+@inject LigneMedicamentServices LigneMedicamentServices
+@inject IJSRuntime JS
+
+@if (IsVisible)
+{
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b p-4">
+                <h3 class="text-lg font-semibold text-[#50bfa2]">
+                    Add Delivered Quantity
+                </h3>
+                <span class="cursor-pointer text-gray-400 hover:text-[#50bfa2]"
+                      @onclick="Close">
+                    ✕
+                </span>
+            </div>
+
+            <EditForm Model="LigneMedicament" OnValidSubmit="HandleUpdate" class="p-6 space-y-4">
+                <DataAnnotationsValidator />
+
+                <!-- Prescribed / Remaining -->
+                <div class="bg-gray-200 rounded-xl p-4">
+                    <div class="flex justify-between">
+                        <span>Prescribed</span>
+                        <strong>@LigneMedicament.qtePrescrite</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Remaining</span>
+                        <strong class="text-[#50bfa2]">@reste</strong>
+                    </div>
+                </div>
+
+                <!-- Input -->
+                <div>
+                    <label class="text-sm text-gray-600">Quantity to deliver</label>
+                    <InputNumber @bind-Value="qteADELIVRER"
+                                 min="1"
+                                 max="@reste"
+                                 class="w-full p-3 border rounded-lg" />
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-2 border-t pt-4">
+                    <span class="cursor-pointer px-4 py-2 bg-gray-300 rounded hover:bg-gray-200"
+                          @onclick="Close">
+                        Cancel
+                    </span>
+
+                    <button type="submit"
+                            class="px-4 py-2 bg-[#50bfa2] text-white rounded">
+                        Save
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public LigneMedicament LigneMedicament { get; set; } = new();
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    int qteADELIVRER;
+    int reste => LigneMedicament.qtePrescrite - (LigneMedicament.qteDelivre ?? 0);
+
+    private async Task HandleUpdate()
+    {
+        LigneMedicament.qteDelivre = qteADELIVRER;
+        await LigneMedicamentServices.DelivrerLigneMedicament(LigneMedicament);
+
+        await JS.InvokeVoidAsync("showToastr", "success", "Ligne délivrée");
+        await OnSaved.InvokeAsync();
+        await Close();
+    }
+
+    private async Task Close()
+    {
+        IsVisible = false;
+        await OnClose.InvokeAsync();
+    }
+}
+
+

@@ -116,7 +116,7 @@
         medecinIdString = medecinIdString?.Trim('"');
 
         Patients = await PatientServices.GetPatients(medecinIdString);
-        StateHasChanged();
+        StateHasChanged();//Rafraîchis l’interface utilisateur maintenant
     }
 
     private void OnSearchChanged(ChangeEventArgs e)

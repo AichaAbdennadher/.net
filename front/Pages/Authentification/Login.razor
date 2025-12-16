@@ -135,9 +135,8 @@
             navigationManager.NavigateTo("/Patients/ListPatients", forceLoad: true);
         }
         else if (role?.Equals("Pharmacien", StringComparison.OrdinalIgnoreCase) == true)
-        {
-            // Redirige vers la liste des médicaments
-            navigationManager.NavigateTo("/Medicaments/ListMedicaments", forceLoad: true);
+        {           
+            navigationManager.NavigateTo("/Dashboard/DashboardPharmacy", forceLoad: true);
         }
     }
 
