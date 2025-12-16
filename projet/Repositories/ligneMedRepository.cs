@@ -98,7 +98,6 @@ namespace projet.Repositories
             return true;
         }
 
-
         public async Task<bool> DeleteLigneMedicament(int id)
         {
             var ligne = await context.lignesMedicaments

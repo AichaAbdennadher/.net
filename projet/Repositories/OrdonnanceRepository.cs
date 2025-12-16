@@ -32,6 +32,13 @@ namespace projet.Repositories
                 .Include(o => o.Patient)
                 .ToListAsync();
         }
+        public async Task<List<Ordonnance>> GetOrdonnancesEnvoyes(Guid PharmacienID)
+        {
+            return await context.ordonnances
+                .Where(o => o.PharmacienID == PharmacienID && o.envoyee == true)
+                .Include(o => o.Patient)
+                .ToListAsync();
+        }
 
 
         public async Task<Ordonnance> GetOrdonnance(int id)
@@ -39,7 +46,7 @@ namespace projet.Repositories
             return await context.ordonnances.FindAsync(id);
         }
 
-        /// /////
+   
         public async Task<bool> UpdateOrdonnance(Ordonnance Ordonnance)
         {
             var dep = await context.ordonnances.FindAsync(Ordonnance.OrdID);
@@ -109,6 +116,15 @@ namespace projet.Repositories
                                 .CountAsync(o => o.PharmacienID == userId);
         }
 
+        public async Task<int> GetNbreDoctors(Guid pharmacienId)
+        {
+            return await context.ordonnances
+                .Where(o => o.PharmacienID == pharmacienId)
+                .Select(o => o.MedecinID)
+                .Distinct()
+                .CountAsync();
+        }
+
         public async Task<int> GetNbreOrdonnanceLivree(Guid userId)
         {
             return await context.ordonnances
@@ -125,30 +141,16 @@ namespace projet.Repositories
                                                   || o.Statut == Statut.PartiellementDelivree));
         }
 
-        public async Task<List<OrdonnanceInfoDTO>> GetDernieresOrdonnancesPharmacien(Guid pharmacienId)
+        public async Task<List<Ordonnance>> GetDernieresOrdonnancesPharmacien(Guid pharmacienId)
         {
             return await context.ordonnances
-              .Include(o => o.Patient)
-                .Join(context.users,
-                o => o.MedecinID.ToString(),
-                u => u.Id,
-                (o, u) => new { o, Medecin = u })
-                .Where(x => x.o.PharmacienID == pharmacienId)
-                .OrderByDescending(x => x.o.DateCreation)
+                .Include(o => o.Patient)
+                .Where(o => o.PharmacienID == pharmacienId)
+                .OrderByDescending(o => o.OrdID)
                 .Take(5)
-                .Select(x => new OrdonnanceInfoDTO
-                {
-                    OrdonnanceID = x.o.OrdID,
-                    PatientNom = x.o.Patient.Nom,
-                   PatientPrenom = x.o.Patient.Prenom,
-                    MedecinNom = x.Medecin.Nom,
-                    MedecinPrenom = x.Medecin.Prenom,
-                    Statut = x.o.Statut,
-                    DateCreation = x.o.DateCreation
-                })
                 .ToListAsync();
-
         }
+
 
         public async Task<List<OrdonnanceParMoisDTO>> GetOrdonnancesParMoisPharmacien(Guid pharmacienId, int annee)
         {
@@ -163,8 +165,55 @@ namespace projet.Repositories
                 .OrderBy(x => x.Mois)
                 .ToListAsync();
         }
+        public async Task<List<LigneMedicament>> DelivrerOrdonnance(int ordId)
+        {
+            // Récupérer l'ordonnance
+            var ordonnance = await context.ordonnances
+                .FirstOrDefaultAsync(o => o.OrdID == ordId);
 
+            if (ordonnance == null) return null;
 
+            // Récupérer les lignes de médicaments pour cette ordonnance (séparément)
+            var lignes = await context.lignesMedicaments
+                .Where(l => l.ordID == ordId)
+                .Include(l => l.Medicament) // pour accéder au stock
+                .ToListAsync();
 
+            List<LigneMedicament> lignesNonDelivrees = new List<LigneMedicament>();
+
+            foreach (var ligne in lignes)
+            {
+                int stock = ligne.Medicament?.Stock ?? 0;
+                int reste = ligne.qtePrescrite - (ligne.qteDelivre ?? 0);
+                if (reste <= 0) continue; // déjà délivrée
+
+                if (reste <= stock)
+                {
+                    ligne.qteDelivre = ligne.qtePrescrite;
+                    ligne.dateDelivre = DateTime.Now;
+                    ligne.statut = Statut.Delivree;
+
+                    // Décrémenter le stock
+                    ligne.Medicament.Stock -= reste;
+                }
+                else
+                {
+                    lignesNonDelivrees.Add(ligne);
+                }
+            }
+            
+            if (lignesNonDelivrees.Count == 0)
+            {
+                ordonnance.Statut = Statut.Delivree;
+            }
+            else
+            {
+                ordonnance.Statut = Statut.PartiellementDelivree;
+            }
+
+            await context.SaveChangesAsync();
+
+            return lignesNonDelivrees;
+        }
     }
 }

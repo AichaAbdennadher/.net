@@ -8,7 +8,8 @@ namespace projet.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize("Medecin")]
+    [Authorize]
+    //("Medecin")
     public class OrdonnanceController : ControllerBase
     {
         private readonly IOrdonnanceRepository repository;
@@ -24,6 +25,17 @@ namespace projet.Controllers
         {
             var Ordonnances = await repository.GetOrdonnancesByMedecin(medecinId);
             return Ok(Ordonnances);
+        }
+        [HttpGet("pharmacy/{PharmacienID}")]
+        public async Task<IActionResult> GetOrdonnancesEnvoyes(Guid PharmacienID)
+        {
+            var Ordonnances = await repository.GetOrdonnancesEnvoyes(PharmacienID);
+            return Ok(Ordonnances);
+        }
+        [HttpGet("delivree/{ordId}")]
+        public async Task<IActionResult> DelivrerOrdonnance(int ordId) { 
+            var lignees = await repository.DelivrerOrdonnance(ordId);
+            return Ok(lignees);
         }
 
         [HttpGet("{id}")]
@@ -69,7 +81,34 @@ namespace projet.Controllers
             return NotFound("supp impoosible");
         }
 
-        [HttpGet("pharmacien/{id}/dernieres")]
+
+        [HttpGet("pharmacy/nbreOrd/{PharmacienID}")]
+        public async Task<IActionResult> GetNbreOrdonnance(Guid PharmacienID)
+        {
+            var nbre = await repository.GetNbreOrdonnance(PharmacienID);
+            return Ok(nbre);
+        }
+        [HttpGet("pharmacy/nbreOrdLivree/{PharmacienID}")]
+        public async Task<IActionResult> GetNbreOrdonnanceLivree(Guid PharmacienID)
+        {
+            var nbre = await repository.GetNbreOrdonnanceLivree(PharmacienID);
+            return Ok(nbre);
+        }
+        [HttpGet("pharmacy/nbreOrdNonLivree/{PharmacienID}")]
+        public async Task<IActionResult> GetNbreOrdonnanceNonLivree(Guid PharmacienID)
+        {
+            var nbre = await repository.GetNbreOrdonnanceNonLivree(PharmacienID);
+            return Ok(nbre);
+        }
+
+        [HttpGet("pharmacy/nbreDoctors/{PharmacienID}")]
+        public async Task<IActionResult> GetNbreDoctors(Guid PharmacienID)
+        {
+            var nbre = await repository.GetNbreDoctors(PharmacienID);
+            return Ok(nbre);
+        }
+
+        [HttpGet("pharmacien/dernieres/{id}")]
         public async Task<IActionResult> GetDernieresOrdonnancesPharmacien(Guid id)
         {
             var result = await repository.GetDernieresOrdonnancesPharmacien(id);
