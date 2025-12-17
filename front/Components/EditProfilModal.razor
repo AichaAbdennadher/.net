@@ -1,0 +1,104 @@
+﻿@using metiers
+@inject UserServices UserServices
+
+@if (IsVisible)
+{
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b p-4">
+                <h3 class="text-lg font-semibold text-[#50bfa2]">Edit Personal Information</h3>
+                <button @onclick="Close" class="text-gray-400 hover:text-[#50bfa2]">✕</button>
+            </div>
+
+            @if (IsLoading)
+            {
+                <div class="p-6 text-center text-gray-500">Loading...</div>
+            }
+            else
+            {
+                <EditForm Model="editUser" OnValidSubmit="HandleUpdate" class="px-6 py-4 space-y-4">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-red-500" />
+
+                    <div>
+                        <label class="block text-sm text-gray-500">First Name</label>
+                        <InputText @bind-Value="editUser.Prenom" class="w-full p-2 border rounded-lg focus:ring-[#50bfa2]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-500">Last Name</label>
+                        <InputText @bind-Value="editUser.Nom" class="w-full p-2 border rounded-lg focus:ring-[#50bfa2]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-500">Email</label>
+                        <InputText @bind-Value="editUser.Email" class="w-full p-2 border rounded-lg focus:ring-[#50bfa2]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-500">Phone</label>
+                        <InputText @bind-Value="editUser.Tel" class="w-full p-2 border rounded-lg focus:ring-[#50bfa2]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-500">Address</label>
+                        <InputText @bind-Value="editUser.Adresse" class="w-full p-2 border rounded-lg focus:ring-[#50bfa2]" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm text-gray-500">Pharmacy Name</label>
+                        <InputText @bind-Value="editUser.NomPharmacie" class="w-full p-2 border rounded-lg focus:ring-[#50bfa2]" />
+                    </div>
+
+                    <div class="flex justify-end gap-2 border-t pt-4">
+                        <button type="button" @onclick="Close" class="bg-gray-200 px-5 py-2 rounded-lg">Cancel</button>
+                        <button type="submit" class="bg-[#50bfa2] text-white px-5 py-2 rounded-lg">Update</button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    private UserDTO editUser;
+    private bool IsLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsVisible)
+        {
+            var currentUser = await UserServices.GetCurrentUser();
+            editUser = new UserDTO
+            {
+                Id = currentUser.Id,
+                Nom = currentUser.Nom,
+                Prenom = currentUser.Prenom,
+                Email = currentUser.Email,
+                Tel = currentUser.Tel,
+                Adresse = currentUser.Adresse,
+                NomPharmacie = currentUser.NomPharmacie
+            };
+            IsLoading = false;
+        }
+    }
+
+    private async Task HandleUpdate()
+    {
+        var success = await UserServices.UpdateUser(editUser);
+        if (success)
+            Close();
+    }
+
+    private async void Close()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+}
+

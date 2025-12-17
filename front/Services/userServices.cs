@@ -5,6 +5,7 @@ using Microsoft.JSInterop;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 
 namespace front.Services
 {
@@ -94,7 +95,12 @@ namespace front.Services
             ) ?? new List<UserDTO>();
         }
 
+        public async Task<bool> UpdateUser(UserDTO user)
+        {
+            var response = await _httpClient.PutAsJsonAsync("api/Account", user);
 
+            return response.IsSuccessStatusCode;
+        }
 
     }
 }

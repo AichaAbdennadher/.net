@@ -15,7 +15,7 @@ namespace metiers.shared
         public string Prenom { get; set; }
         [EmailAddress]
         public string Email { get; set; }
-        public string Password { get; set; }
+        public string? Password { get; set; }
         public string Tel { get; set; }
         public string Adresse { get; set; }
         public string? Specialite { get; set; }

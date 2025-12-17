@@ -1,0 +1,79 @@
+﻿@page "/Authentification/ProfilPh"
+@inject UserServices UserServices
+@inject NavigationManager Navigation
+
+<HeaderPh />
+
+<div class="max-w-5xl mx-auto p-6 space-y-6 bg-gray-200 min-h-screen">
+    @if (user == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <!-- ================= PROFILE HEADER ================= -->
+        <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <!-- Left section: Avatar and basic info -->
+            <div class="flex items-center gap-4">
+                <img src="images/avatar.jpg" alt="Avatar" class="w-16 h-16 rounded-full object-cover border" />
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">@user.Prenom @user.Nom</h2>
+                    <p class="text-sm text-gray-500 mb-0">Pharmacy @user.NomPharmacie</p>
+                    <p class="text-sm text-gray-500">@user.Adresse</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PERSONAL INFORMATION ================= -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
+                <button @onclick="GoToEdit" class="flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium hover:bg-gray-100">
+                    <i class='bx bx-edit text-gray-500 text-2xl'></i>
+                    Edit
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm text-gray-500">First Name</p>
+                    <p class="font-medium text-gray-900 mt-1">@user.Prenom</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Last Name</p>
+                    <p class="font-medium text-gray-900 mt-1">@user.Nom</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Email Address</p>
+                    <p class="font-medium text-gray-900 mt-1">@user.Email</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Phone</p>
+                    <p class="font-medium text-gray-900 mt-1">@user.Tel</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Address</p>
+                    <p class="font-medium text-gray-900 mt-1">@user.Adresse</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Pharmacy Name</p>
+                    <p class="font-medium text-gray-900 mt-1">@user.NomPharmacie</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private UserDTO user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserServices.GetCurrentUser();
+    }
+
+    private void GoToEdit()
+    {
+        Navigation.NavigateTo("/Authentification/EditProfil");
+    }
+}

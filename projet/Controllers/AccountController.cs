@@ -1,4 +1,5 @@
-﻿using metiers.shared;
+﻿using metiers;
+using metiers.shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -47,14 +48,12 @@ public class AccountController : ControllerBase
         {
             UserName = newUserDTO.Email,
             Email = newUserDTO.Email,
-
             Nom = newUserDTO.Nom,
             Prenom = newUserDTO.Prenom,
             Tel = newUserDTO.Tel,
             Adresse = newUserDTO.Adresse,
             Specialite = newUserDTO.Specialite,
             NomPharmacie = newUserDTO.NomPharmacie,
-
             UserRole = newUserDTO.Role
 
         };
@@ -136,4 +135,31 @@ public class AccountController : ControllerBase
 
         });
     }
+    [Authorize]
+    [HttpPut]
+    public async Task<IActionResult> UpdateUser([FromBody] UserDTO dto)
+    {
+        // récupérer l'utilisateur connecté
+        var user = await userManager.GetUserAsync(User);
+
+        if (user == null)
+            return Unauthorized();
+
+        // mise à jour des champs
+        user.Nom = dto.Nom;
+        user.Prenom = dto.Prenom;
+        user.Email = dto.Email;
+        user.UserName = dto.Email;
+        user.Tel = dto.Tel;
+        user.Adresse = dto.Adresse;
+        user.NomPharmacie = dto.NomPharmacie;
+
+        var result = await userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        return NoContent();
+    }
+
 }
