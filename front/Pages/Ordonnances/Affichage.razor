@@ -1,4 +1,4 @@
-﻿@page "/Ordonnances/AffichageOrdonnance/{id:int}"
+﻿@page "/Ordonnances/Affichage/{id:int}"
 @using metiers
 @inject UserServices UserServices
 @inject OrdonnanceServices OrdonnanceServices
@@ -62,7 +62,7 @@
                         <h3>Patient</h3>
                         <p>@Ordonnance.Patient?.Nom @Ordonnance.Patient?.Prenom</p>
                         <p> <span class="font-medium">Birth date:</span> @Ordonnance.Patient?.DateNaissance.ToString("dd/MM/yyyy")</p>
-                       <p><span class="font-medium">Adress:</span> @Ordonnance.Patient?.Adresse</p>
+                        <p><span class="font-medium">Adress:</span> @Ordonnance.Patient?.Adresse</p>
                         <p><span class="font-medium">Phone:</span> @Ordonnance.Patient?.Tel</p>
                     </div>
                 </div>
@@ -88,16 +88,18 @@
                     </tbody>
                 </table>
 
-                <div class="signature">
-                    <p>Fait à Sfax, le @Ordonnance.DateCreation.ToString("dd/MM/yyyy")</p>
-                    <p>Signature & Cachet</p>
+                <!-- SIGNATURE -->
+                <div class="signature w-full flex justify-end mt-6">
+                    <div class="text-right">
+                        <p>Fait à Sfax, le @Ordonnance.DateCreation.ToString("dd/MM/yyyy")</p>
+                        <p>Signature & Cachet</p>
+                    </div>
                 </div>
-
             </main>
 
             <!-- BOUTONS -->
             <div class="flex justify-end gap-2 p-4 border-t no-print">
-               
+
                 <button class="bg-gray-300 px-4 py-2 rounded" @onclick="Cancel">Close </button>
             </div>
         }
@@ -129,5 +131,5 @@
         IsLoading = false;
     }
 
-    void Cancel() => Navigation.NavigateTo("/Ordonnances/ListOrdonnances");
+    void Cancel() => Navigation.NavigateTo("/Ordonnances/ListOrdonnancesRecus");
 }

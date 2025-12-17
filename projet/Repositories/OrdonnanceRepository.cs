@@ -43,10 +43,13 @@ namespace projet.Repositories
 
         public async Task<Ordonnance> GetOrdonnance(int id)
         {
-            return await context.ordonnances.FindAsync(id);
+            return await context.ordonnances
+                     .Include(o => o.Patient)
+                     .FirstOrDefaultAsync(o => o.OrdID == id);
+
         }
 
-   
+
         public async Task<bool> UpdateOrdonnance(Ordonnance Ordonnance)
         {
             var dep = await context.ordonnances.FindAsync(Ordonnance.OrdID);

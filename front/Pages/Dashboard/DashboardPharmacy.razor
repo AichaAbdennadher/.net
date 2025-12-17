@@ -1,5 +1,6 @@
 ﻿@page "/Dashboard/DashboardPharmacy"
 @inject OrdonnanceServices OrdonnanceService
+@inject UserServices UserServices
 @using metiers
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -71,7 +72,7 @@
                 <thead class="bg-gray-50 uppercase text-xs">
                     <tr>
                         <th class="px-4 py-3">Number</th>
-                        @* <th class="px-4 py-3">Doctor</th> *@
+                        <th class="px-4 py-3">Doctor</th>
                         <th class="px-4 py-3">Patient</th>
                         <th class="px-4 py-3">Date</th>
                         <th class="px-4 py-3">Status</th>
@@ -82,7 +83,11 @@
                     {
                         <tr class="border-b">
                             <td class="px-4 py-3">@ord.OrdID</td>
-                            @* <td class="px-4 py-3">@ord.MedecinID</td> *@
+                            <td class="px-4 py-3">
+                                @(DoctorsByOrdonnance.ContainsKey(ord.OrdID)
+                                                            ? $"{DoctorsByOrdonnance[ord.OrdID].Prenom} {DoctorsByOrdonnance[ord.OrdID].Nom}"
+                                                            : "")
+                            </td>
                             <td class="px-4 py-3">@ord.Patient?.Nom @ord.Patient?.Prenom</td>
                             <td class="px-4 py-3">@ord.DateCreation.ToShortDateString()</td>
                             <td class="px-4 py-3">
@@ -111,6 +116,7 @@
 
     List<Ordonnance> DernieresOrdonnances = new();
     ElementReference salesChart;
+    private Dictionary<int, UserDTO> DoctorsByOrdonnance = new();
 
     string PharmacienId = "";
 
@@ -141,6 +147,13 @@
         PrescriptionsLivreeCount = await OrdonnanceService.GetNbreOrdonnancesLivrees(PharmacienId);
         PrescriptionsNonLivreeCount = await OrdonnanceService.GetNbreOrdonnancesNonLivrees(PharmacienId);
         DernieresOrdonnances = await OrdonnanceService.GetDernieresOrdonnancesPharmacien(PharmacienId);
+        DoctorsByOrdonnance.Clear();
+
+        foreach (Ordonnance ord in DernieresOrdonnances)
+        {
+            var doctor = await UserServices.GetDoctor(ord.MedecinID);
+            DoctorsByOrdonnance[ord.OrdID] = doctor;
+        }
 
 
     }

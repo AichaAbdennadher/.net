@@ -136,6 +136,28 @@ public class AccountController : ControllerBase
         });
     }
     [Authorize]
+    [HttpGet("Doctor/{medecinId:guid}")]
+    public async Task<IActionResult> GetDoctor(Guid medecinId)
+    {
+        var user = await userManager.FindByIdAsync(medecinId.ToString());
+
+        if (user == null)
+            return NotFound("Médecin introuvable");
+
+        var doctorDto = new UserDTO
+        {
+            Email = user.Email,
+            Nom = user.Nom,
+            Prenom = user.Prenom,
+            Adresse = user.Adresse,
+            Specialite = user.Specialite,
+            Tel = user.Tel
+        };
+
+        return Ok(doctorDto);
+    }
+
+    [Authorize]
     [HttpPut]
     public async Task<IActionResult> UpdateUser([FromBody] UserDTO dto)
     {

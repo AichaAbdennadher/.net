@@ -101,6 +101,11 @@ namespace front.Services
 
             return response.IsSuccessStatusCode;
         }
-
+        public async Task<UserDTO> GetDoctor(Guid medecinId)
+        {
+            return await _httpClient.GetFromJsonAsync<UserDTO>(
+                $"api/Account/Doctor/{medecinId}"
+            );
+        }
     }
 }

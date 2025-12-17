@@ -1,5 +1,109 @@
-﻿<h3>AffichagePatient</h3>
+﻿@page "/Patients/AffichagePatient/{id:int}"
+@using metiers
+@inject PatientServices PatientServices
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b p-4">
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Patient Details</h3>
+            <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
+        </div>
+
+        @if (IsLoading)
+        {
+            <div class="p-6 text-center text-gray-500">Loading...</div>
+        }
+        else
+        {
+            <!-- ================= PROFILE HEADER ================= -->
+            <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <!-- Left section: Avatar and basic info -->
+                <div class="flex items-center gap-4">
+                    <img src="images/avatar.jpg" alt="Avatar" class="w-16 h-16 rounded-full object-cover border" />
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">@Patient.Prenom @Patient.Nom</h2>
+                        <p class="text-sm text-gray-500 mb-0">@Patient.Adresse</p>
+                    </div>
+                </div>
+            </div>
+            <!-- ================= PERSONAL INFORMATION ================= -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-gray-500">First Name</p>
+                        <p class="font-medium text-gray-900 mt-1">@Patient.Prenom</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Last Name</p>
+                        <p class="font-medium text-gray-900 mt-1">@Patient.Nom</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Birth date </p>
+                        <p class="font-medium text-gray-900 mt-1">@Patient.DateNaissance.ToString("dd/MM/yyyy")</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Phone</p>
+                        <p class="font-medium text-gray-900 mt-1">@Patient.Tel</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Address</p>
+                        <p class="font-medium text-gray-900 mt-1">@Patient.Adresse</p>
+                    </div>
+                  
+                   
+
+                </div>
+                <div class="flex justify-end space-x-2 border-t pt-4">
+                    <button type="button" @onclick="Cancel"
+                            class="bg-gray-300 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-normal text-[#6f7885]">
+                        Close
+                    </button>
+                </div>
+
+            </div> 
+        }
+    </div>
+</div>
 
 @code {
+    [Parameter] public int id { get; set; }
 
+    private Patient Patient;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Charger le patient existant
+        var existing = await PatientServices.GetPatientAsync(id);
+
+        if (existing != null)
+        {
+            Patient = existing;
+        }
+
+       
+
+        IsLoading = false;
+    }
+
+
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/Patients/ListPatients");
+    }
 }
+
+

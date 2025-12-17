@@ -81,7 +81,11 @@
                                           @onclick="() => Send(ord)">
                                         <i class='bx bx-mail-send text-[#50bfa2] text-2xl'></i>
                                     </span>
-
+                                    <span class="cursor-pointer p-2 rounded hover:bg-gray-100"
+                                          title="Voir l’ordonnance"
+                                          @onclick="() => Voir(ord.OrdID)">
+                                        <i class="fa-regular fa-eye text-gray-500 text-xl"></i>
+                                    </span>
                                 </td>
                             </tr>
                         }
@@ -150,4 +154,6 @@
     private void Edit(int id) => Navigation.NavigateTo($"/Ordonnances/Edit/{id}");
     private void Delete(int id) => Navigation.NavigateTo($"/Ordonnances/Delete/{id}");
     private void CreerOrdonnance() => Navigation.NavigateTo("/Ordonnances/Create");
+    private void Voir(int id)
+     => Navigation.NavigateTo($"/Ordonnances/AffichageOrdonnance/{id}");
 }
