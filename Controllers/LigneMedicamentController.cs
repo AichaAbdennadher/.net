@@ -36,10 +36,10 @@ namespace projet.Controllers
         {
             var result = await repository.DelivrerLigneMedicament(ligneMedicament);
 
-            if (result == Statut.nonEnvoye)
-                return BadRequest(Statut.nonEnvoye);
+            if (!result)
+                return BadRequest("Erreur : La ligne n'a pas pu être délivrée.");
 
-            return Ok(result);
+            return Ok("La ligne a été délivrée avec succès.");
         }
 
         [HttpDelete("{id}")]

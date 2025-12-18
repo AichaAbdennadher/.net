@@ -16,17 +16,12 @@ namespace projet.Repositories
             this.context = context;
         }
 
+      
+
         public async Task<IEnumerable<ApplicationUser>> GetPharmaciens()
         {
             return await context.users
                 .Where(u => u.UserRole == Role.Pharmacien)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<ApplicationUser>> GetMedecinsExcept(Guid idMedecin)
-        {
-            return await context.users
-                .Where(u => u.UserRole == Role.Medecin && u.Id != idMedecin.ToString())
                 .ToListAsync();
         }
     }

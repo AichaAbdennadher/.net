@@ -102,6 +102,7 @@
     private async Task LoadMedicamentsByPharmacie()
     {
         var pharmaID = ParentOrdonnance?.PharmacienID ?? TempOrdonnanceService.TempPharmacieID ?? Guid.Empty;
+        Console.WriteLine($"PharmaID = {pharmaID}");
         if (pharmaID != Guid.Empty)
         {
             allMedicaments = await MedicamentServices.GetMedicaments(pharmaID);

@@ -71,9 +71,22 @@
     private async Task HandleUpdate()
     {
         LigneMedicament.qteDelivre = qteADELIVRER;
-        await LigneMedicamentServices.DelivrerLigneMedicament(LigneMedicament);
+        var result = await LigneMedicamentServices.DelivrerLigneMedicament(LigneMedicament);
+        if (result == Statut.nonEnvoye )
+        {
+            await JS.InvokeVoidAsync("showToastr", "error", "Ligne non délivrée");
+        }
+        else if (result == Statut.PartiellementDelivree)
+        {
 
-        await JS.InvokeVoidAsync("showToastr", "success", "Ligne délivrée");
+            await JS.InvokeVoidAsync("showToastr", "success", "Ligne partiellement délivrée");
+        }
+        else
+        {
+
+            await JS.InvokeVoidAsync("showToastr", "success", "Ligne délivrée");
+            
+        }
         await OnSaved.InvokeAsync();
         await Close();
     }

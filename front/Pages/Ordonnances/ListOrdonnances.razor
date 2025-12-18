@@ -10,10 +10,8 @@
     <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
         <div class="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden">
 
-            <!-- Header -->
             <div class="flex flex-col md:flex-row items-center justify-between p-4 bg-white gap-4">
 
-                <!-- Search selon patient -->
                 <div class="w-full md:w-1/2 relative">
                     <input type="text" @bind="SearchText"
                            placeholder="Search"
@@ -25,7 +23,6 @@
                     </span>
                 </div>
 
-                <!-- Add -->
                 <button class="flex items-center text-white font-medium rounded-lg text-base px-4 py-2 bg-[#50bfa2] hover:bg-[#95dbc8]"
                         @onclick="CreerOrdonnance">
 
@@ -36,7 +33,6 @@
                 </button>
             </div>
 
-            <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-500">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -57,30 +53,36 @@
                                 <td>@($"{ord.Patient.Nom} {ord.Patient.Prenom}")</td>
                                 <td class="px-4 py-3">@ord.DateCreation.ToString("MM/dd/yyyy")</td>
                                 <td class="px-4 py-3">
-                                    <span class="px-3 py-1 rounded bg-green-100 text-green-700">
+                                    <span class="px-2 py-1 rounded text-white
+                                            @(ord.Statut == Statut.Delivree ? "bg-green-500" : @ord.Statut == Statut.PartiellementDelivree ? "bg-green-300" :
+                                                                                                                      ord.Statut == Statut.EnAttente ? "bg-yellow-500" :
+                                                                                                                      "bg-red-500")">
                                         @ord.Statut
                                     </span>
                                 </td>
 
                                 <td class="px-4 py-3 flex space-x-2">
 
-                                    <!-- Edit -->
                                     <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
                                           @onclick="() => Edit(ord.OrdID)">
                                         <i class='bx bx-edit text-gray-500 text-2xl'></i>
                                     </span>
 
-                                    <!-- Delete -->
                                     <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
                                           @onclick="() => Delete(ord.OrdID)">
                                         <i class='bx bxs-trash text-red-500 text-2xl'></i>
                                     </span>
 
-                                    <!-- Send -->
                                     <span class="cursor-pointer px-2 py-1 rounded hover:bg-gray-100"
+                                          title="Envoyer l’ordonnance"
                                           @onclick="() => Send(ord)">
-                                        <i class='bx bx-mail-send text-[#50bfa2] text-2xl'></i>
+                                        <i class='bx bx-mail-send text-2xl'
+                                           style="color:@(ord.envoyee ? "#d1d1d1" : "#50bfa2")">
+                                        </i>
                                     </span>
+
+
+
                                     <span class="cursor-pointer p-2 rounded hover:bg-gray-100"
                                           title="Voir l’ordonnance"
                                           @onclick="() => Voir(ord.OrdID)">
@@ -139,15 +141,32 @@
 
     private async Task Send(Ordonnance ord)
     {
+        if (ord.envoyee)
+            return; // already sent
+
         bool result = await OrdonnanceServices.SendOrdonnance(ord);
 
         if (result)
         {
-            await JS.InvokeVoidAsync("showToastr", "success", "Prescription sent successfully");
+            // ✅ Update local state
+            ord.envoyee = true;
+            ord.Statut = Statut.EnAttente; // or whatever status makes sense
+
+            await JS.InvokeVoidAsync(
+                "showToastr",
+                "success",
+                "Prescription sent successfully"
+            );
+
+            StateHasChanged();
         }
         else
         {
-            await JS.InvokeVoidAsync("showToastr", "error", "The prescription was not sent");
+            await JS.InvokeVoidAsync(
+                "showToastr",
+                "error",
+                "The prescription was not sent"
+            );
         }
     }
 

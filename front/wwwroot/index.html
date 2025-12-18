@@ -6,68 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>front</title>
     <base href="/" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/dashboard.js"></script>
-    <!-- ================= TOASTR ================= -->
+
+    <!-- =================== CSS =================== -->
+    <!-- Tailwind -->
+    <link href="css/output.css" rel="stylesheet" />
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <!-- Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
-
-    <!-- jQuery (obligatoire pour Toastr) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-    <!-- Toastr JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-    <!-- ✅ Toastr Config (SANS ICÔNE) -->
-    <script>
-        window.showToastr = function (type, message) {
-            toastr.options = {
-                closeButton: false,
-                progressBar: false,
-                positionClass: "toast-top-right",
-                timeOut: 4000,
-                newestOnTop: true,
-                preventDuplicates: true,
-
-                /* 🔥 suppression totale des icônes */
-                iconClasses: {
-                    error: "",
-                    info: "",
-                    success: "",
-                    warning: ""
-                }
-            };
-
-            toastr.clear();
-            toastr[type](message);
-        };
-    </script>
-    <!-- ========================================== -->
     <!-- Icons -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Tailwind -->
-    <link href="css/output.css" rel="stylesheet" />
-
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
-
     <!-- App CSS -->
     <link rel="stylesheet" href="css/app.css" />
-
-    <!-- PWA -->
-    <link rel="icon" type="image/png" href="favicon.png" />
     <link href="front.styles.css" rel="stylesheet" />
     <link href="manifest.webmanifest" rel="manifest" />
+    <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
-
-    <!-- Autres JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/theme.js"></script>
-
-    <script type="importmap"></script>
 </head>
 
 <body>
@@ -84,8 +40,56 @@
         <a href="." class="reload">Reload</a>
     </div>
 
-    <script src="_framework/blazor.webassembly.js"></script>
+    <!-- =================== JS =================== -->
+    <!-- 1️⃣ jQuery core (TOASTR dépend de jQuery) -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- 2️⃣ jQuery UI (optionnel, seulement si tu veux des easing avancés) -->
+    <!-- <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script> -->
+    <!-- 3️⃣ Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- 4️⃣ Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 5️⃣ SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- 6️⃣ Tes scripts personnalisés -->
+    <script src="js/dashboard.js"></script>
+    <script src="js/theme.js"></script>
+
+    <!-- 7️⃣ Toastr helper -->
     <script>
+        window.showToastr = (type, message) => {
+            toastr.options = {
+                closeButton: false,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: "3000",
+                extendedTimeOut: "1000",
+                showDuration: "300",
+                hideDuration: "300",
+                showEasing: "swing",   // jQuery core supporte "swing" ou "linear"
+                hideEasing: "swing",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut"
+            };
+
+            const types = ["success", "info", "warning", "error"];
+            if (types.includes(type)) {
+                toastr[type](message);
+            } else {
+                toastr.info(message);
+            }
+        }
+    </script>
+
+    <!-- 8️⃣ Blazor -->
+    <script src="_framework/blazor.webassembly.js"></script>
+
+    <script>
+        // Service Worker PWA
         navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });
     </script>
 </body>

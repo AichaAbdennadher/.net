@@ -42,11 +42,11 @@ namespace front.Services
             var response = await _httpClient.PutAsJsonAsync("api/LigneMedicament", LigneMedicament);
             return response.IsSuccessStatusCode;
         }
-        public async Task<bool> DelivrerLigneMedicament(LigneMedicament LigneMedicament)
+        public async Task<Statut> DelivrerLigneMedicament(LigneMedicament LigneMedicament)
         {
             await AddJwtHeaderAsync();
             var response = await _httpClient.PutAsJsonAsync("api/LigneMedicament/delivrer", LigneMedicament);
-            return response.IsSuccessStatusCode;
+            return await response.Content.ReadFromJsonAsync<Statut>();
         }
 
         public async Task<bool> DeleteLigneMedicament(int id)

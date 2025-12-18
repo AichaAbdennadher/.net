@@ -59,29 +59,29 @@ namespace projet.Repositories
             await context.SaveChangesAsync();
             return true;
         }
-        public async Task<bool> DelivrerLigneMedicament(LigneMedicament model)
+        public async Task<Statut> DelivrerLigneMedicament(LigneMedicament model)
         {
             var existing = await context.lignesMedicaments
                 .Include(l => l.Medicament)
                 .FirstOrDefaultAsync(l => l.ligneID == model.ligneID);
 
             if (existing == null || existing.Medicament == null)
-                return false;
+                return Statut.nonEnvoye;
 
             int qteDemandee = model.qteDelivre ?? 0;
 
             // Sécurités
             if (qteDemandee <= 0)
-                return false;
+                return Statut.nonEnvoye;
 
             int dejaDelivre = existing.qteDelivre ?? 0;
             int restante = existing.qtePrescrite - dejaDelivre;
 
             if (qteDemandee > restante)
-                return false;
+                return Statut.nonEnvoye;
 
             if (existing.Medicament.Stock < qteDemandee)
-                return false;
+                return Statut.nonEnvoye;
 
             // ✅ Mise à jour correcte
             existing.qteDelivre = dejaDelivre + qteDemandee;
@@ -95,7 +95,7 @@ namespace projet.Repositories
                 existing.statut = Statut.PartiellementDelivree;
 
             await context.SaveChangesAsync();
-            return true;
+            return existing.statut;
         }
 
         public async Task<bool> DeleteLigneMedicament(int id)

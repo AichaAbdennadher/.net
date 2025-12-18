@@ -29,7 +29,7 @@ namespace projet.Controllers
                 Id = Guid.Parse(u.Id),
                 Nom = u.Nom,
                 Prenom = u.Prenom,
-                //  Email = u.Email,
+              //  Email = u.Email,
                 Tel = u.Tel,
                 NomPharmacie = u.NomPharmacie,
                 Role = Role.Pharmacien
@@ -38,7 +38,27 @@ namespace projet.Controllers
             return Ok(result);
         }
 
+        // 🔥 Médecins sauf connecté
+        //[Authorize("Pharmacien")]
+        [HttpGet("medecins")]
+        public async Task<IActionResult> GetMedecinsExceptConnected()
+        {
+            Guid idFromToken = Guid.Parse(User.FindFirst("id").Value);
 
+            var medecins = await repository.GetMedecinsExcept(idFromToken);
+
+            var result = medecins.Select(u => new
+            {
+                userId = u.Id,
+                u.Nom,
+                u.Prenom,
+                u.Email,
+                u.Tel,
+                u.Specialite
+            });
+
+            return Ok(result);
+        }
 
 
     }

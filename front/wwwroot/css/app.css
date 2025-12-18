@@ -1,4 +1,4 @@
-/* ================= GLOBAL ================= */
+ï»¿/* ================= GLOBAL ================= */
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -127,50 +127,98 @@ code {
     margin: 1px;
 }
 
-/* ================= TOASTR ROUGE SANS ICÔNE ================= */
+/* ===================== TOASTR MODERNE ===================== */
 #toast-container {
-    position: fixed !important;
     z-index: 99999 !important;
 }
 
-.toast-top-right {
-    top: 1rem !important;
-    right: 1rem !important;
-}
-
+/* ================== BASE TOAST ================== */
 .toast {
-    background-color: #dc3545 !important; /* ROUGE GARANTI */
-    color: #fff !important;
-    border-radius: 12px !important;
-    padding: 12px 16px !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+    border-radius: 16px !important;
+    padding: 16px 20px !important;
     font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22) !important;
     opacity: 1 !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid transparent;
+    max-width: 380px;
 }
 
-/* Forcer rouge pour les erreurs */
+/* ================== SUCCESS ================== */
+.toast-success {
+    background: linear-gradient( 135deg, #ecfdf3 0%, #d1fae5 100% ) !important;
+    color: #065f46 !important;
+    border-color: #6ee7b7;
+    border-left: 6px solid #10b981;
+}
+
+/* ================== ERROR ================== */
 .toast-error {
-    background-color: #dc3545 !important;
-    color: #fff !important;
+    background: linear-gradient( 135deg, #fef2f2 0%, #fee2e2 100% ) !important;
+    color: #7f1d1d !important;
+    border-color: #fca5a5;
+    border-left: 6px solid #ef4444;
 }
 
-    /* Supprimer toutes icônes Toastr */
-    .toast::before,
-    .toast-message::before,
-    .toast-success::before,
-    .toast-error::before,
-    .toast-warning::before,
-    .toast-info::before {
-        content: none !important;
-        display: none !important;
-    }
+/* ================== WARNING ================== */
+.toast-warning {
+    background: linear-gradient( 135deg, #fffbeb 0%, #fef3c7 100% ) !important;
+    color: #78350f !important;
+    border-color: #fde68a;
+    border-left: 6px solid #f59e0b;
+}
 
-/* Supprimer padding réservé à l’icône */
+/* ================== INFO ================== */
+.toast-info {
+    background: linear-gradient( 135deg, #eff6ff 0%, #dbeafe 100% ) !important;
+    color: #1e3a8a !important;
+    border-color: #93c5fd;
+    border-left: 6px solid #3b82f6;
+}
+
+
+/* ------------------- Suppression icÃ´nes et bouton fermer ------------------- */
+.toast::before,
+.toast-message::before {
+    display: none !important;
+    content: none !important;
+}
+
+.toast-close-button {
+    display: none !important;
+}
+
 .toast-message {
     padding-left: 0 !important;
 }
 
-/* Supprimer bouton fermer */
-.toast-close-button {
-    display: none !important;
+/* ==================== ThÃ¨me sombre ==================== */
+body.dark .toast-success {
+    background: linear-gradient(135deg, #218838, #28a745) !important;
+    color: #d4f8d4 !important;
+}
+
+body.dark .toast-error {
+    background: linear-gradient(135deg, #a71d2a, #dc3545) !important;
+    color: #f8d7da !important;
+}
+
+body.dark .toast-warning {
+    background: linear-gradient(135deg, #e0a800, #ffc107) !important;
+    color: #000000 !important;
+}
+
+body.dark .toast-info {
+    background: linear-gradient(135deg, #0f6674, #17a2b8) !important;
+    color: #e0f7ff !important;
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 768px) {
+    .toast {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
 }

@@ -152,7 +152,7 @@
         Patients = await PatientServices.GetPatients(userId);
         filteredPatients = Patients.ToList();
 
-        Pharmacies = await UserServices.GetPharmacies();
+        Pharmacies = await UserServices.GetPharmaciesD();
         filteredPharmacies = Pharmacies.ToList();
     }
 
@@ -172,6 +172,7 @@
 
     private async Task SelectPharmacie(UserDTO ph)
     {
+        Console.WriteLine($"ph.Id = {ph.Id}");
         Ordonnance.PharmacienID = ph.Id;
         TempOrdonnanceService.TempPharmacieID = ph.Id;
         searchPharmacie = ph.NomPharmacie;

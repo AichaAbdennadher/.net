@@ -1,0 +1,148 @@
+﻿@page "/LigneMedicaments/Delivree/{id:int}"
+@using metiers
+@inject LigneMedicamentServices LigneMedicamentServices
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-y-auto"> 
+        <!-- Header w-auto -->
+        <div class="flex items-center justify-between border-b p-4">
+            <h3 class="text-lg font-semibold text-[#50bfa2]">Add Delivred quantity</h3>
+            <button @onclick="Cancel" class="text-gray-400 hover:text-[#50bfa2]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
+        </div>
+
+        @if (IsLoading)
+        {
+            <div class="p-6 text-center text-gray-500">Loading...</div>
+        }
+        else
+        {
+            <!-- Form -->
+            <EditForm Model="LigneMedicament" OnValidSubmit="HandleUpdate" class="px-6 py-4 space-y-4">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-red-500" />
+                <div class="space-y-4">
+
+                    <!-- Bloc 1 : Quantité prescrite + reste -->
+                    <div class="bg-gray-300 border rounded-xl p-4 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-gray-800">Prescribed quantity</span>
+                            <span class="text-lg font-semibold text-gray-800">
+                                @LigneMedicament.qtePrescrite
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-gray-800">Remaining</span>
+                            <span class="text-sm font-medium text-[#50bfa2]">
+                                @reste
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bloc 2 : Input pour quantité à délivrer -->
+                    <div class="bg-gray-50 border rounded-xl p-4 space-y-2">
+                        <label class="block mb-1 text-sm font-normal text-gray-600">
+                            Quantity to deliver
+                        </label>
+
+                        <InputNumber @bind-Value="qteADELIVRER"
+                                     min="1"
+                                     max=" @LigneMedicament.qtePrescrite"
+                                     class="w-full p-3 border rounded-lg text-base
+                                focus:outline-none focus:ring-2
+                                focus:ring-[#50bfa2] focus:border-[#50bfa2]" />
+
+                       
+                    </div>
+
+                </div>
+
+
+                <!-- Buttons -->
+                <div class="flex justify-end space-x-2 border-t pt-4">
+                    <button type="button" @onclick="Cancel"
+                            class="bg-gray-300 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-normal text-[#6f7885]">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="bg-[#50bfa2] hover:bg-[#95dbc8] text-white px-5 py-2.5 rounded-lg text-sm font-medium">
+                        Save
+                    </button>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private LigneMedicament LigneMedicament { get; set; } = new LigneMedicament();
+    private bool IsLoading = true;
+    int qteADELIVRER;
+    int reste => LigneMedicament.qtePrescrite - (LigneMedicament.qteDelivre ?? 0);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Charger le LigneMedicament existant
+        var existing = await LigneMedicamentServices.GetLigneMedicament(id);
+
+        if (existing != null)
+        {
+            LigneMedicament = existing;
+        }
+
+
+        IsLoading = false;
+    }
+
+    private async Task HandleUpdate()
+    {
+        int dejaDelivre = LigneMedicament.qteDelivre ?? 0;
+
+        // On envoie UNIQUEMENT la quantité demandée
+        LigneMedicament.qteDelivre = qteADELIVRER;
+
+        var result = await LigneMedicamentServices
+            .DelivrerLigneMedicament(LigneMedicament);
+
+        if (result != Statut.nonEnvoye)
+        {
+            int totalDelivre = dejaDelivre + qteADELIVRER;
+            int qtePrescrite = LigneMedicament.qtePrescrite;
+
+            if (totalDelivre == qtePrescrite)
+            {
+                await JS.InvokeVoidAsync("showToastr", "success", "Totalement délivrée");
+            }
+            else if (totalDelivre > 0 && totalDelivre < qtePrescrite)
+            {
+                await JS.InvokeVoidAsync("showToastr", "success", "Partiellement délivrée");
+            }
+
+
+            Navigation.NavigateTo("/LignesMedicaments/ListLignesMedicaments");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("showToastr", "error", "Insufficient storage");
+            //fermer le model
+        }
+    }
+
+
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/LignesMedicaments/ListLignesMedicaments");
+    }
+}
+

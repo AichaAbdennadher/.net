@@ -103,14 +103,20 @@ namespace projet.Repositories
 
         public async Task<bool> EnvoyerOrdonnance(Ordonnance ordonnance)
         {
+            // Récupération de l'ordonnance depuis le contexte
             var dep = await context.ordonnances.FindAsync(ordonnance.OrdID);
             if (dep == null)
                 return false;
+
+            // Modification des propriétés sur l'entité attachée
             dep.envoyee = true;
+            dep.Statut = Statut.EnAttente;
+
+            // Sauvegarde dans la base
             await context.SaveChangesAsync();
             return true;
-
         }
+
 
         //Dashboard pharmcien
         public async Task<int> GetNbreOrdonnance(Guid userId)
@@ -154,7 +160,13 @@ namespace projet.Repositories
                 .ToListAsync();
         }
 
-
+        public async Task<List<Ordonnance>> GetPatients(Guid pharmacienId)
+        {
+            return await context.ordonnances
+                .Include(o => o.Patient)
+                .Where(o => o.PharmacienID == pharmacienId)
+                .ToListAsync();
+        }
         public async Task<List<OrdonnanceParMoisDTO>> GetOrdonnancesParMoisPharmacien(Guid pharmacienId, int annee)
         {
             return await context.ordonnances

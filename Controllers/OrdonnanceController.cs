@@ -119,16 +119,6 @@ namespace projet.Controllers
             return Ok(result);
         }
 
-        [HttpGet("pharmacien/patients/{id}")]
-        public async Task<IActionResult> GetPatients(Guid id)
-        {
-            var result = await repository.GetPatients(id);
-
-            if (result == null || result.Count == 0)
-                return NotFound("Aucune ordonnance trouvée.");
-
-            return Ok(result);
-        }
         [HttpGet("pharmacien/{pharmacienId}/statistiques/mois/{annee}")]
         public async Task<IActionResult> GetOrdonnancesParMoisPharmacien(Guid pharmacienId, int annee)
         {

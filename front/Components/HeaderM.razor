@@ -11,20 +11,18 @@
 
         <!-- NAVIGATION -->
         <nav class="flex items-center space-x-8 text-[15px] font-semibold">
-
-            <NavLink href="/Ordonnances/ListOrdonnances"
-                     class="text-gray-600 hover:text-[#50bfa2] no-underline"
-                     activeClass="!text-[#50bfa2] no-underline">
-                Prescriptions
-            </NavLink>
-
             <NavLink href="/Patients/ListPatients"
                      class="text-gray-600 hover:text-[#50bfa2] no-underline"
                      activeClass="!text-[#50bfa2] no-underline">
                 Patients
             </NavLink>
+            <NavLink href="/Ordonnances/ListOrdonnances"
+                     class="text-gray-600 hover:text-[#50bfa2] no-underline"
+                     activeClass="!text-[#50bfa2] no-underline">
+                Prescriptions
+            </NavLink>
           @* pas obligtoires *@
-            <NavLink href="/Users/Pharmacies"
+            <NavLink href="/Authentification/ListPharmaciens"
                      class="text-gray-600 hover:text-[#50bfa2] no-underline"
                      activeClass="!text-[#50bfa2] no-underline">
                 Pharmacies

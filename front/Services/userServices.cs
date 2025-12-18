@@ -86,15 +86,8 @@ namespace front.Services
             await AddJwtHeaderAsync();
             return await _localStorage.GetItemAsync<string>("role");
         }
-        public async Task<List<UserDTO>> GetPharmacies()
-        {
-            await AddJwtHeaderAsync();
-
-            return await _httpClient.GetFromJsonAsync<List<UserDTO>>(
-                "api/User/pharmaciens"
-            ) ?? new List<UserDTO>();
-        }
-
+   
+  
         public async Task<bool> UpdateUser(UserDTO user)
         {
             var response = await _httpClient.PutAsJsonAsync("api/Account", user);
@@ -106,6 +99,37 @@ namespace front.Services
             return await _httpClient.GetFromJsonAsync<UserDTO>(
                 $"api/Account/Doctor/{medecinId}"
             );
+        }
+
+        // Récupérer tous les médecins
+        public async Task<List<UserDTO>> GetDoctorsAsync()
+        {
+            await AddJwtHeaderAsync();
+            var response = await _httpClient.GetAsync("api/Account/Doctors"); // adapter l'URL si nécessaire
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<UserDTO>>();
+            }
+            return new List<UserDTO>();
+        }
+
+     
+        public async Task<List<UserDTO>> GetPharmaciesD()
+        {
+            await AddJwtHeaderAsync();
+
+            return await _httpClient.GetFromJsonAsync<List<UserDTO>>(
+                "api/Account/pharmaciensD"
+            ) ?? new List<UserDTO>();
+        }
+
+        public async Task<List<UserDTO>> GetPharmacies()
+        {
+            await AddJwtHeaderAsync();
+
+            return await _httpClient.GetFromJsonAsync<List<UserDTO>>(
+                "api/User/pharmaciens"
+            ) ?? new List<UserDTO>();
         }
     }
 }

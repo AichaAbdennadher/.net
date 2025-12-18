@@ -109,6 +109,16 @@ namespace front.Services
             await AddJwtHeaderAsync();
             return await _httpClient.GetFromJsonAsync<List<Ordonnance>>($"api/Ordonnance/pharmacien/dernieres/{pharmacienId}");
         }
+        // Méthode pour récupérer les ordonnances d’un pharmacien
+        public async Task<List<Patient>> GetPatients(Guid pharmacienId)
+        {
+            var ordonnances = await _httpClient.GetFromJsonAsync<List<Ordonnance>>(
+                $"api/Ordonnance/pharmacien/patients/{pharmacienId}"
+            );
+
+            // Extraction des patients uniques
+            return ordonnances?.Select(o => o.Patient).DistinctBy(p => p.PatientID).ToList() ?? new List<Patient>();
+        }
         public async Task<List<OrdonnanceParMoisDTO>> GetOrdonnancesParMoisPharmacien(
     string pharmacienId, int annee)
         {

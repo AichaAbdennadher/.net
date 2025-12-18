@@ -21,7 +21,7 @@ namespace projet.Repositories
         Task<int> GetNbreDoctors(Guid id); //pour chaque pharmacien //id a partir de token 
         Task<List<Ordonnance>> GetDernieresOrdonnancesPharmacien(Guid pharmacienId);
         Task<List<OrdonnanceParMoisDTO>> GetOrdonnancesParMoisPharmacien(Guid pharmacienId, int annee);
-
+        Task<List<Ordonnance>> GetPatients(Guid pharmacienId);
 
 
     }

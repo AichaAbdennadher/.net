@@ -1,5 +1,4 @@
-﻿using metiers;
-using metiers.shared;
+﻿using metiers.shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -48,12 +47,14 @@ public class AccountController : ControllerBase
         {
             UserName = newUserDTO.Email,
             Email = newUserDTO.Email,
+
             Nom = newUserDTO.Nom,
             Prenom = newUserDTO.Prenom,
             Tel = newUserDTO.Tel,
             Adresse = newUserDTO.Adresse,
             Specialite = newUserDTO.Specialite,
             NomPharmacie = newUserDTO.NomPharmacie,
+
             UserRole = newUserDTO.Role
 
         };
@@ -135,115 +136,4 @@ public class AccountController : ControllerBase
 
         });
     }
-    [Authorize]
-    [HttpGet("Doctor/{medecinId:guid}")]
-    public async Task<IActionResult> GetDoctor(Guid medecinId)
-    {
-        var user = await userManager.FindByIdAsync(medecinId.ToString());
-
-        if (user == null)
-            return NotFound("Médecin introuvable");
-
-        var doctorDto = new UserDTO
-        {
-            Email = user.Email,
-            Nom = user.Nom,
-            Prenom = user.Prenom,
-            Adresse = user.Adresse,
-            Specialite = user.Specialite,
-            Tel = user.Tel
-        };
-
-        return Ok(doctorDto);
-    }
-    [Authorize]
-    [HttpGet("Doctors")]
-    public async Task<IActionResult> GetDoctors()
-    {
-        // Récupérer tous les utilisateurs
-        var users = userManager.Users.ToList();
-
-        // Filtrer les utilisateurs qui ont le rôle "Medecin"
-        var doctors = new List<UserDTO>();
-        foreach (var user in users)
-        {
-            if (await userManager.IsInRoleAsync(user, "Medecin"))
-            {
-                doctors.Add(new UserDTO
-                {
-                    Email = user.Email,
-                    Nom = user.Nom,
-                    Prenom = user.Prenom,
-                    Adresse = user.Adresse,
-                    Specialite = user.Specialite,
-                    Tel = user.Tel
-                });
-            }
-        }
-
-        if (doctors.Count == 0)
-            return NotFound("Aucun médecin trouvé");
-
-        return Ok(doctors);
-    }
-    [Authorize]
-    [HttpGet("PharmaciensD")]
-    public async Task<IActionResult> GetPharmaciens()
-    {
-        // Récupérer tous les utilisateurs
-        var users = userManager.Users.ToList();
-
-        // Filtrer les utilisateurs qui ont le rôle "Medecin"
-        var doctors = new List<UserDTO>();
-        foreach (var user in users)
-        {
-            if (await userManager.IsInRoleAsync(user, "Pharmacien"))
-            {
-                doctors.Add(new UserDTO
-                {
-                    Id = Guid.Parse(user.Id),
-                    Email = user.Email,
-                    Nom = user.Nom,
-                    Prenom = user.Prenom,
-                    Adresse = user.Adresse,
-                    NomPharmacie = user.NomPharmacie,
-                    Tel = user.Tel
-                });
-            }
-        }
-
-        if (doctors.Count == 0)
-            return NotFound("Aucun médecin trouvé");
-
-        return Ok(doctors);
-    }
-
-
-    [Authorize]
-    [HttpPut]
-    public async Task<IActionResult> UpdateUser([FromBody] UserDTO dto)
-    {
-        // récupérer l'utilisateur connecté
-        var user = await userManager.GetUserAsync(User);
-
-        if (user == null)
-            return Unauthorized();
-
-        // mise à jour des champs
-        user.Nom = dto.Nom;
-        user.Prenom = dto.Prenom;
-        user.Email = dto.Email;
-        user.UserName = dto.Email;
-        user.Tel = dto.Tel;
-        user.Adresse = dto.Adresse;
-        user.NomPharmacie = dto.NomPharmacie;
-
-        var result = await userManager.UpdateAsync(user);
-
-        if (!result.Succeeded)
-            return BadRequest(result.Errors);
-
-        return NoContent();
-    }
-
 }

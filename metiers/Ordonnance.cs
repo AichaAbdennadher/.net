@@ -14,7 +14,7 @@ namespace metiers
 
         public bool envoyee { get; set; } = false;
         [Required]
-        public Statut Statut { get; set; } = Statut.EnAttente;
+        public Statut Statut { get; set; } = Statut.nonEnvoye;
         [Required]
         public int PatientID { get; set; }
         public virtual Patient? Patient { get; set; } //ok
