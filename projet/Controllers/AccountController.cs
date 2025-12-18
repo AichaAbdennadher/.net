@@ -156,7 +156,7 @@ public class AccountController : ControllerBase
 
         return Ok(doctorDto);
     }
-    [Authorize]
+    [Authorize("Pharmacien")]
     [HttpGet("Doctors")]
     public async Task<IActionResult> GetDoctors()
     {
@@ -186,7 +186,7 @@ public class AccountController : ControllerBase
 
         return Ok(doctors);
     }
-    [Authorize]
+    [Authorize("Medecin")]
     [HttpGet("PharmaciensD")]
     public async Task<IActionResult> GetPharmaciens()
     {

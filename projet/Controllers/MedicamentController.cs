@@ -8,7 +8,6 @@ namespace projet.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class MedicamentController : ControllerBase
     {
         private readonly IMedicamentRepository repository;
@@ -24,6 +23,7 @@ namespace projet.Controllers
         //    var Medicaments = await repository.GetTousMedicaments();
         //    return Ok(Medicaments);
         //}
+        [Authorize]
         [HttpPost("diminuer-stock")]
         public async Task<IActionResult> DiminuerStock( DiminuerStockDto dto)
         {
@@ -38,14 +38,14 @@ namespace projet.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpGet("Medicaments/ph/{userId}")]
         public async Task<IActionResult> GetMedicaments(Guid userId)
         {
             var Medicaments = await repository.GetMedicamentsPharmacien(userId);
             return Ok(Medicaments);
         }
-
+        [Authorize("Pharmacien")]
         [HttpPost]
         public async Task<IActionResult> CreateMedicament(Medicament Medicament, Guid id)
         {
@@ -57,7 +57,7 @@ namespace projet.Controllers
             Medicament newMedicament = await repository.CreateMedicament(Medicament);
             return CreatedAtAction(nameof(GetMedicamentByID), new { id = newMedicament.MedicamentID}, newMedicament);
         }
-
+        [Authorize("Pharmacien")]
         [HttpPut]
         public async Task<IActionResult> updateMedicament(Medicament Medicament)
         {
@@ -65,14 +65,14 @@ namespace projet.Controllers
             if (result) return NoContent();
             return BadRequest("erreur update");
         }
-
+        [Authorize("Pharmacien")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetMedicamentByID(int id)
         {
             return Ok(await repository.GetMedicament(id));
 
         }
-
+        [Authorize("Pharmacien")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> deleteMedicament(int id)
         {

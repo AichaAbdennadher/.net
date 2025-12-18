@@ -16,14 +16,14 @@ namespace projet.Controllers
         {
             this.repository = repository;
         }
-
+        [Authorize("medecin")]
         [HttpPost]
         public async Task<IActionResult> CreateLigneMedicament(LigneMedicament ligneMedicament)
         { 
             LigneMedicament newLigneMedicament = await repository.CreateLigneMedicament(ligneMedicament);
             return CreatedAtAction(nameof(GetlMedByID), new { id = newLigneMedicament.ligneID }, newLigneMedicament);
         }
-
+        [Authorize("medecin")]
         [HttpPut]
         public async Task<IActionResult> updateLigneMedicament(LigneMedicament ligneMedicament)
         {
@@ -31,6 +31,7 @@ namespace projet.Controllers
             if (result) return NoContent();
             return BadRequest("erreur update");
         }
+        [Authorize("Pharmacien")]
         [HttpPut("delivrer")]
         public async Task<IActionResult> DelivrerLigneMedicament(LigneMedicament ligneMedicament)
         {
@@ -41,7 +42,7 @@ namespace projet.Controllers
 
             return Ok(result);
         }
-
+        [Authorize("medecin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> deleteLigneMedicament(int id)
         {
@@ -49,7 +50,7 @@ namespace projet.Controllers
             if (result) return NoContent();
             return NotFound("supp impoosible");
         }
-
+        [Authorize]
         [HttpGet("ph/{userId}")]
         public async Task<IActionResult> GetligMeds(Guid userId)
         {

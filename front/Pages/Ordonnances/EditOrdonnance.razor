@@ -142,7 +142,7 @@
 
 
         Patients = await PatientServices.GetPatients(userId);
-        Pharmacies = await UserServices.GetPharmacies();
+        Pharmacies = await UserServices.GetPharmaciesD();
 
         var p = Patients.FirstOrDefault(x => x.PatientID == Ordonnance.PatientID);
         if (p != null) searchPatient = $"{p.CIN} {p.Nom} {p.Prenom}";

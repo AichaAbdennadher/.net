@@ -48,6 +48,8 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Medecin", policy =>
         policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Medecin"));
+    options.AddPolicy("Pharmacien", policy =>
+        policy.RequireClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", "Pharmacien"));
 });
 
 // Controllers

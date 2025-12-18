@@ -17,7 +17,6 @@ namespace projet.Controllers
             this.repository = repository;
         }
 
-
         [HttpGet("patients/medecin/{medecinId}")]
         public async Task<IActionResult> GetPatientsByMedecin(Guid medecinId)
         {
@@ -33,6 +32,7 @@ namespace projet.Controllers
 
         }
 
+        [Authorize("Medecin")]
         [HttpPost]
         public async Task<IActionResult> CreatePatient(Patient patient,Guid medecinId)
         {
@@ -45,6 +45,7 @@ namespace projet.Controllers
             return CreatedAtAction(nameof(GetPatientByID), new { id = newpatient.PatientID }, newpatient);
         }
 
+        [Authorize("Medecin")]
         [HttpPut]
         public async Task<IActionResult> updatePatient(Patient dep)
         {
@@ -53,6 +54,7 @@ namespace projet.Controllers
             return BadRequest("erreur update");
         }
 
+        [Authorize("Medecin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> deletePatient(int id)
         {

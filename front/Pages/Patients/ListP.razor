@@ -4,7 +4,7 @@
 @inject OrdonnanceServices OrdonnanceServices
 @inject IJSRuntime JS
 
-<HeaderM />
+<HeaderPh />
 
 <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5">
     <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
@@ -117,5 +117,5 @@
         currentPage = 1;
     }
 
-    private void Voir(int id) => Navigation.NavigateTo($"/Patients/AffichagePatient/{id}");
+    private void Voir(int id) => Navigation.NavigateTo($"/Patients/AffichageP/{id}");
 }
